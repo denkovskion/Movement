@@ -31,7 +31,7 @@
 
 namespace movement {
 
-long count(
+unsigned long long count(
     int nPlies, Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Node>>>>
@@ -46,15 +46,17 @@ std::shared_ptr<Node> Perft::doSolve(
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed) {
   if (detailed) {
     std::vector<std::shared_ptr<Node>> nodes;
-    long nNodes = count(nPlies_, position_, pseudoLegalMoves, nodes);
+    unsigned long long nNodes =
+        count(nPlies_, position_, pseudoLegalMoves, nodes);
     return std::make_shared<DivideRoot>(nNodes, nodes);
   } else {
-    long nNodes = count(nPlies_, position_, pseudoLegalMoves, std::nullopt);
+    unsigned long long nNodes =
+        count(nPlies_, position_, pseudoLegalMoves, std::nullopt);
     return std::make_shared<PerftNode>(nNodes);
   }
 }
 
-long count(
+unsigned long long count(
     int nPlies, Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Node>>>>
@@ -62,11 +64,11 @@ long count(
   if (nPlies == 0) {
     return 1;
   }
-  long nNodes = 0;
+  unsigned long long nNodes = 0;
   for (const std::shared_ptr<Move>& move : pseudoLegalMoves) {
     if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesNext;
         move->make(position, pseudoLegalMovesNext, std::nullopt)) {
-      long nChildNodes =
+      unsigned long long nChildNodes =
           count(nPlies - 1, position, pseudoLegalMovesNext, std::nullopt);
       if (nodes) {
         nodes->get().push_back(std::make_shared<DivideLeaf>(move, nChildNodes));
@@ -80,7 +82,7 @@ long count(
 
 std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
-    std::vector<std::shared_ptr<Move>> pseudoLegalMoves);
+    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed);
 int searchMax(int nMoves, Position& position,
               const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax);
 int searchMin(int nMoves, Position& position,
@@ -93,37 +95,14 @@ std::string MateSearch::getOperation() const {
 }
 std::shared_ptr<Node> MateSearch::doSolve(
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed) {
-  if (detailed) {
-    std::vector<std::shared_ptr<Node>> nodes =
-        analyse(nMoves_, position_, pseudoLegalMoves);
-    return std::make_shared<MateRoot>(nodes);
-  } else {
-    std::vector<std::shared_ptr<Node>> nodes;
-    for (std::shared_ptr<Move> moveMax : pseudoLegalMoves) {
-      if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
-          moveMax->make(position_, pseudoLegalMovesMin, std::nullopt)) {
-        int min = searchMin(nMoves_, position_, pseudoLegalMovesMin);
-        if (min > 0) {
-          int distanceMax = nMoves_ - min + 1;
-          nodes.push_back(std::make_shared<MateLeaf>(moveMax, distanceMax));
-        }
-      }
-      moveMax->unmake(position_);
-    }
-    std::stable_sort(
-        nodes.begin(), nodes.end(),
-        [](const std::shared_ptr<Node>& node1,
-           const std::shared_ptr<Node>& node2) {
-          return std::static_pointer_cast<MateLeaf>(node1)->getDistance() <
-                 std::static_pointer_cast<MateLeaf>(node2)->getDistance();
-        });
-    return std::make_shared<MateRoot>(nodes);
-  }
+  std::vector<std::shared_ptr<Node>> nodes =
+      analyse(nMoves_, position_, pseudoLegalMoves, detailed);
+  return std::make_shared<MateRoot>(nodes);
 }
 
 std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
-    std::vector<std::shared_ptr<Move>> pseudoLegalMoves) {
+    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed) {
   std::vector<std::shared_ptr<Node>> nodes;
   for (std::shared_ptr<Move> moveMax : pseudoLegalMoves) {
     if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
@@ -131,39 +110,49 @@ std::vector<std::shared_ptr<Node>> analyse(
       int min = searchMin(nMoves, position, pseudoLegalMovesMin);
       if (min > 0) {
         int distanceMax = nMoves - min + 1;
-        std::vector<std::shared_ptr<Node>> nodesMin;
-        for (std::shared_ptr<Move> moveMin : pseudoLegalMovesMin) {
-          if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMax;
-              moveMin->make(position, pseudoLegalMovesMax, std::nullopt)) {
-            int max = searchMax(distanceMax - 1, position, pseudoLegalMovesMax);
-            int distanceMin = distanceMax - max;
-            std::vector<std::shared_ptr<Node>> nodesMax =
-                analyse(distanceMin, position, pseudoLegalMovesMax);
-            nodesMin.push_back(
-                std::make_shared<MateBranch>(moveMin, distanceMin, nodesMax));
+        if (detailed) {
+          std::vector<std::shared_ptr<Node>> nodesMin;
+          for (std::shared_ptr<Move> moveMin : pseudoLegalMovesMin) {
+            if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMax;
+                moveMin->make(position, pseudoLegalMovesMax, std::nullopt)) {
+              int max =
+                  searchMax(distanceMax - 1, position, pseudoLegalMovesMax);
+              int distanceMin = distanceMax - max;
+              std::vector<std::shared_ptr<Node>> nodesMax =
+                  analyse(distanceMin, position, pseudoLegalMovesMax, true);
+              nodesMin.push_back(
+                  std::make_shared<MateBranch>(moveMin, distanceMin, nodesMax));
+            }
+            moveMin->unmake(position);
           }
-          moveMin->unmake(position);
+          std::stable_sort(nodesMin.begin(), nodesMin.end(),
+                           [](const std::shared_ptr<Node>& node1,
+                              const std::shared_ptr<Node>& node2) {
+                             return std::static_pointer_cast<MateBranch>(node1)
+                                        ->getDistance() >
+                                    std::static_pointer_cast<MateBranch>(node2)
+                                        ->getDistance();
+                           });
+          nodes.push_back(
+              std::make_shared<MateBranch>(moveMax, distanceMax, nodesMin));
+        } else {
+          nodes.push_back(std::make_shared<MateLeaf>(moveMax, distanceMax));
         }
-        std::stable_sort(
-            nodesMin.begin(), nodesMin.end(),
-            [](const std::shared_ptr<Node>& node1,
-               const std::shared_ptr<Node>& node2) {
-              return std::static_pointer_cast<MateBranch>(node1)
-                         ->getDistance() >
-                     std::static_pointer_cast<MateBranch>(node2)->getDistance();
-            });
-        nodes.push_back(
-            std::make_shared<MateBranch>(moveMax, distanceMax, nodesMin));
       }
     }
     moveMax->unmake(position);
   }
   std::stable_sort(
       nodes.begin(), nodes.end(),
-      [](const std::shared_ptr<Node>& node1,
-         const std::shared_ptr<Node>& node2) {
-        return std::static_pointer_cast<MateBranch>(node1)->getDistance() <
-               std::static_pointer_cast<MateBranch>(node2)->getDistance();
+      [detailed](const std::shared_ptr<Node>& node1,
+                 const std::shared_ptr<Node>& node2) {
+        return (detailed
+                    ? std::static_pointer_cast<MateBranch>(node1)->getDistance()
+                    : std::static_pointer_cast<MateLeaf>(node1)
+                          ->getDistance()) <
+               (detailed
+                    ? std::static_pointer_cast<MateBranch>(node2)->getDistance()
+                    : std::static_pointer_cast<MateLeaf>(node2)->getDistance());
       });
   return nodes;
 }

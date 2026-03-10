@@ -32,30 +32,31 @@ namespace movement {
 class Move;
 
 class DivideRoot : public Node {
-  long count_;
+  unsigned long long count_;
   std::vector<std::shared_ptr<Node>> children_;
 
  public:
-  DivideRoot(long count, const std::vector<std::shared_ptr<Node>>& children);
+  DivideRoot(unsigned long long count,
+             const std::vector<std::shared_ptr<Node>>& children);
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class DivideLeaf : public Node {
   std::shared_ptr<Move> move_;
-  long count_;
+  unsigned long long count_;
 
  public:
-  DivideLeaf(const std::shared_ptr<Move>& move, long count);
+  DivideLeaf(const std::shared_ptr<Move>& move, unsigned long long count);
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class PerftNode : public Node {
-  long count_;
+  unsigned long long count_;
 
  public:
-  PerftNode(long count);
+  PerftNode(unsigned long long count);
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };

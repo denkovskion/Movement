@@ -29,7 +29,7 @@
 
 namespace movement {
 
-DivideRoot::DivideRoot(long count,
+DivideRoot::DivideRoot(unsigned long long count,
                        const std::vector<std::shared_ptr<Node>>& children)
     : count_(count), children_(children) {}
 void DivideRoot::doFormat(Position& position, std::ostream& output, int moveNo,
@@ -41,7 +41,8 @@ void DivideRoot::doFormat(Position& position, std::ostream& output, int moveNo,
   output << count_;
 }
 
-DivideLeaf::DivideLeaf(const std::shared_ptr<Move>& move, long count)
+DivideLeaf::DivideLeaf(const std::shared_ptr<Move>& move,
+                       unsigned long long count)
     : move_(move), count_(count) {}
 void DivideLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
                           bool inlyne) const {
@@ -50,7 +51,7 @@ void DivideLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
   move_->unmake(position);
 }
 
-PerftNode::PerftNode(long count) : count_(count) {}
+PerftNode::PerftNode(unsigned long long count) : count_(count) {}
 void PerftNode::doFormat(Position& position, std::ostream& output, int moveNo,
                          bool inlyne) const {
   output << count_;
