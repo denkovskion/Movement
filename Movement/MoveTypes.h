@@ -23,15 +23,16 @@
  */
 
 #pragma once
+
 #include "Move.h"
 
 namespace movement {
 
 class QuietMove : public NullMove {
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  protected:
@@ -43,10 +44,10 @@ class QuietMove : public NullMove {
 };
 
 class Capture : virtual public QuietMove {
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  protected:
@@ -58,8 +59,8 @@ class Capture : virtual public QuietMove {
 
 class Castling : public QuietMove {
   bool preMake(Position& position) const override;
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
 
  protected:
@@ -70,7 +71,7 @@ class Castling : public QuietMove {
 };
 
 class LongCastling : public Castling {
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  public:
@@ -78,7 +79,7 @@ class LongCastling : public Castling {
 };
 
 class ShortCastling : public Castling {
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  public:
@@ -98,10 +99,10 @@ class DoubleStep : public QuietMove {
 };
 
 class EnPassant : public Capture {
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  protected:
@@ -112,10 +113,10 @@ class EnPassant : public Capture {
 };
 
 class Promotion : virtual public QuietMove {
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  protected:
@@ -126,10 +127,10 @@ class Promotion : virtual public QuietMove {
 };
 
 class PromotionCapture : public Promotion, public Capture {
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 
  public:

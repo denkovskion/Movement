@@ -51,7 +51,7 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
             }
             symbol = symbolInput.get();
           }
-          int square = file * 8 + rank;
+          int square = file * 16 + rank;
           if (symbol == 'K') {
             position.board[square] = std::make_unique<King>(false);
           } else if (symbol == 'Q') {
@@ -106,16 +106,16 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
                 if (!(token == "-")) {
                   for (char symbol : token) {
                     if (symbol == 'K' || symbol == 'Q') {
-                      position.castlingOrigins.insert(32);
+                      position.castlingOrigins.insert(64);
                     } else if (symbol == 'k' || symbol == 'q') {
-                      position.castlingOrigins.insert(39);
+                      position.castlingOrigins.insert(71);
                     }
                     if (symbol == 'K') {
-                      position.castlingOrigins.insert(56);
+                      position.castlingOrigins.insert(112);
                     } else if (symbol == 'Q') {
                       position.castlingOrigins.insert(0);
                     } else if (symbol == 'k') {
-                      position.castlingOrigins.insert(63);
+                      position.castlingOrigins.insert(119);
                     } else if (symbol == 'q') {
                       position.castlingOrigins.insert(7);
                     }
@@ -126,7 +126,7 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
                     if (!(token == "-")) {
                       int file = token.at(0) - 'a';
                       int rank = token.at(1) - '1';
-                      position.enPassantTarget = file * 8 + rank;
+                      position.enPassantTarget = file * 16 + rank;
                     }
                     if (std::string token; tokenInput >> token) {
                       if (std::regex_match(token, std::regex("acd|dm"))) {

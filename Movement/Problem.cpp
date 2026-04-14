@@ -38,20 +38,21 @@ Problem::Problem(Position position) : position_(std::move(position)) {}
 Problem::~Problem() {}
 
 void Problem::solve(bool detailed) {
-  std::cout << std::string(42, '_') + "\n"
-            << formatToString(position_, getOperation()) + "\n"
-            << std::endl;
-  logger(std::clog) << "Solving...\n";
+  std::cout << std::string(42, '_') << std::endl;
+  std::cout << toFormatted(position_, getOperation()) << std::endl;
+  std::cout << std::endl;
+  logger(std::clog) << (detailed ? "Solving with analysis...\n"
+                                 : "Solving...\n");
   std::chrono::steady_clock::time_point begin =
       std::chrono::steady_clock::now();
   std::shared_ptr<Node> solution;
   if (std::vector<std::shared_ptr<Move>> pseudoLegalMoves;
       isPositionLegal(position_, pseudoLegalMoves)) {
-    solution = doSolve(pseudoLegalMoves, detailed);
+    solution = doSolve(position_, pseudoLegalMoves, detailed);
   } else {
-    solution = std::make_unique<IllegalNode>();
+    solution = std::make_shared<IllegalNode>();
   }
-  std::cout << formatToString(solution, position_) << std::endl;
+  std::cout << toFormatted(solution, position_) << std::endl;
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   logger(std::clog)
       << "Finished solving in " +
@@ -59,7 +60,7 @@ void Problem::solve(bool detailed) {
                  std::chrono::duration_cast<std::chrono::milliseconds>(end -
                                                                        begin)
                      .count()) +
-             " ms.\n";
+             "ms.\n";
 }
 
 std::ostream& logger(std::ostream& output) {
@@ -74,6 +75,8 @@ std::ostream& logger(std::ostream& output) {
 #endif
   if (localTime) {
     output << std::put_time(localTime, "%c Movement: ");
+  } else {
+    output << "Movement: ";
   }
   return output;
 }

@@ -27,8 +27,11 @@
 namespace movement {
 
 Piece::Piece(bool black) : black_(black) {}
+
 Piece::~Piece() {}
+
 bool Piece::isBlack() const { return black_; }
+
 bool Piece::isRoyal() const { return false; }
 
 }  // namespace movement

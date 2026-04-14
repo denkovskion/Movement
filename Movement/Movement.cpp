@@ -45,8 +45,8 @@ static const char* const CONFIGURATION_SFX = "";
 
 int main(int argc, char* argv[]) {
   try {
-    bool version = false;
     bool help = false;
+    bool version = false;
     bool detailed = false;
     for (int i = 1; i < argc; ++i) {
       std::string arg = argv[i];
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   Movement [OPTIONS]
 
 Chess mate searcher. Reads problems as EPD records (with one operation:
-  dm for mate search or acd for perft) until EOF, then solves them.
+  dm for direct mate or acd for perft) until EOF, then solves them.
 
 Options:
   -h, --help       Show help and exit

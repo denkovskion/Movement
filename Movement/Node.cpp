@@ -35,8 +35,7 @@ void IllegalNode::doFormat(Position& position, std::ostream& output, int moveNo,
   output << "Illegal position";
 }
 
-std::string formatToString(const std::shared_ptr<Node>& node,
-                           Position& position) {
+std::string toFormatted(const std::shared_ptr<Node>& node, Position& position) {
   std::stringstream output;
   node->doFormat(position, output, 1, false);
   return output.str();

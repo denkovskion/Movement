@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <memory>
 #include <ostream>
 #include <string>
@@ -34,6 +35,7 @@ struct Position;
 class Node {
  public:
   ~Node();
+
   virtual void doFormat(Position& position, std::ostream& output, int moveNo,
                         bool inlyne) const = 0;
 };
@@ -44,7 +46,6 @@ class IllegalNode : public Node {
                 bool inlyne) const override;
 };
 
-std::string formatToString(const std::shared_ptr<Node>& node,
-                           Position& position);
+std::string toFormatted(const std::shared_ptr<Node>& node, Position& position);
 
 }  // namespace movement

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0] - 2026-04-14
+
+### Changed
+
+- Board representation is now based on 0x88
+- Search now uses iterative deepening when analysis is not requested
+
 ## [1.0.1] - 2026-03-10
 
 - Maintenance release

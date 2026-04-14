@@ -23,14 +23,17 @@
  */
 
 #pragma once
+
 #include "Problem.h"
 
 namespace movement {
 
 class Perft : public Problem {
   const int nPlies_;
+
   std::string getOperation() const override;
   std::shared_ptr<Node> doSolve(
+      Position& position,
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
       bool detailed) override;
 
@@ -40,8 +43,10 @@ class Perft : public Problem {
 
 class MateSearch : public Problem {
   const int nMoves_;
+
   std::string getOperation() const override;
   std::shared_ptr<Node> doSolve(
+      Position& position,
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
       bool detailed) override;
 

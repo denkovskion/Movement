@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <ostream>
 
 #include "Position.h"
@@ -32,17 +33,20 @@ namespace movement {
 class Node;
 
 class Problem {
+  Position position_;
+
   virtual std::string getOperation() const = 0;
   virtual std::shared_ptr<Node> doSolve(
+      Position& position,
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
       bool detailed) = 0;
 
  protected:
-  Position position_;
   Problem(Position position);
 
  public:
   virtual ~Problem();
+
   void solve(bool detailed);
 };
 

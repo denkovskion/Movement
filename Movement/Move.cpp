@@ -72,14 +72,19 @@ void Move::unmake(Position& position) {
 }
 
 bool NullMove::preMake(Position& position) const { return true; }
-void NullMove::updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) {}
-void NullMove::revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) {}
+
+void NullMove::updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) {}
+
+void NullMove::revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) {}
+
 void NullMove::updateCastlingOrigins(std::set<int>& castlingOrigins) const {}
+
 void NullMove::updateEnPassantTarget(
     std::optional<int>& enPassantTarget) const {
   enPassantTarget.reset();
 }
-void NullMove::preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+
+void NullMove::preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                         std::ostream& lanBuilder) const {
   lanBuilder << "null";
 }
@@ -94,14 +99,9 @@ void postWrite(
   if (pseudoLegalMoves) {
     pseudoLegalMovesNext = pseudoLegalMoves->get();
   } else {
-    for (int origin = 0; origin < 64; ++origin) {
-      if (const std::unique_ptr<Piece>& piece = position.board[origin]) {
-        if (piece->isBlack() == position.blackToMove) {
-          piece->generateMoves(origin, position.board, position.castlingOrigins,
-                               position.enPassantTarget, pseudoLegalMovesNext);
-        }
-      }
-    }
+    isKingInCheck(position.board, position.blackToMove,
+                  position.castlingOrigins, position.enPassantTarget,
+                  pseudoLegalMovesNext, true);
   }
   bool terminal = true;
   for (const std::shared_ptr<Move>& moveNext : pseudoLegalMovesNext) {
@@ -113,20 +113,11 @@ void postWrite(
       break;
     }
   }
-  int nChecks = 0;
   std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
   nullMove->make(position, std::nullopt, std::nullopt);
-  for (int origin = 0; origin < 64; ++origin) {
-    if (const std::unique_ptr<Piece>& piece = position.board[origin]) {
-      if (piece->isBlack() == position.blackToMove) {
-        if (!piece->generateMoves(origin, position.board,
-                                  position.castlingOrigins,
-                                  position.enPassantTarget, std::nullopt)) {
-          ++nChecks;
-        }
-      }
-    }
-  }
+  int nChecks = isKingInCheck(position.board, position.blackToMove,
+                              position.castlingOrigins,
+                              position.enPassantTarget, std::nullopt, true);
   nullMove->unmake(position);
   if (terminal) {
     if (nChecks > 0) {

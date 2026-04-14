@@ -30,25 +30,16 @@ bool isPositionLegal(
     const Position& position,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves) {
-  for (int origin = 0; origin < 64; ++origin) {
-    if (const std::unique_ptr<Piece>& piece = position.board[origin]) {
-      if (piece->isBlack() == position.blackToMove) {
-        if (!piece->generateMoves(origin, position.board,
-                                  position.castlingOrigins,
-                                  position.enPassantTarget, pseudoLegalMoves)) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
+  return isKingInCheck(position.board, position.blackToMove,
+                       position.castlingOrigins, position.enPassantTarget,
+                       pseudoLegalMoves, false) == 0;
 }
 
-std::string formatToString(const Position& position,
-                           const std::string& operation) {
-  return Piece::formatToString(position.board, position.blackToMove,
-                               position.castlingOrigins,
-                               position.enPassantTarget, operation);
+std::string toFormatted(const Position& position,
+                        const std::string& operation) {
+  return Piece::toFormatted(position.board, position.blackToMove,
+                            position.castlingOrigins, position.enPassantTarget,
+                            operation);
 }
 
 }  // namespace movement

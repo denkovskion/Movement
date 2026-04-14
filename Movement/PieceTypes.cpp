@@ -24,7 +24,6 @@
 
 #include "PieceTypes.h"
 
-#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
 
@@ -35,19 +34,17 @@ namespace movement {
 enum { KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
 
 Leaper::Leaper(bool black) : Piece(black) {}
+
 bool Leaper::generateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         moves) const {
   const std::vector<int>& directions = getDirections();
-  int maxOffset = getMaxOffset();
   for (int direction : directions) {
     int target = origin + direction;
-    if (target >= 0 && target < 64 &&
-        std::abs(target / 8 - origin / 8) <= maxOffset &&
-        std::abs(target % 8 - origin % 8) <= maxOffset) {
+    if ((target & 136) == 0) {
       if (const std::unique_ptr<Piece>& captured = board[target]) {
         if (captured->isBlack() != black_) {
           if (captured->isRoyal()) {
@@ -69,20 +66,18 @@ bool Leaper::generateMoves(
 }
 
 Rider::Rider(bool black) : Piece(black) {}
+
 bool Rider::generateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         moves) const {
   const std::vector<int>& directions = getDirections();
-  int maxOffset = getMaxOffset();
   for (int direction : directions) {
     for (int square = origin;;) {
       int target = square + direction;
-      if (target >= 0 && target < 64 &&
-          std::abs(target / 8 - square / 8) <= maxOffset &&
-          std::abs(target % 8 - square % 8) <= maxOffset) {
+      if ((target & 136) == 0) {
         if (const std::unique_ptr<Piece>& captured = board[target]) {
           if (captured->isBlack() != black_) {
             if (captured->isRoyal()) {
@@ -110,9 +105,11 @@ bool Rider::generateMoves(
 }
 
 King::King(bool black) : Leaper(black) {}
+
 bool King::isRoyal() const { return true; }
+
 bool King::generateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -122,7 +119,7 @@ bool King::generateMoves(
     return false;
   }
   if (castlingOrigins.count(origin) != 0) {
-    const int castlingDirections[] = {-8, 8};
+    const int castlingDirections[] = {-16, 16};
     for (int direction : castlingDirections) {
       int target2 = origin + direction;
       if (!board[target2]) {
@@ -154,68 +151,79 @@ bool King::generateMoves(
   }
   return true;
 }
+
 const std::vector<int>& King::getDirections() const {
-  static const std::vector<int> directions = {-9, -8, -7, -1, 1, 7, 8, 9};
+  static const std::vector<int> directions = {-17, -16, -15, -1, 1, 15, 16, 17};
   return directions;
 }
-int King::getMaxOffset() const { return 1; }
+
 const char* King::getLanCode() const { return "K"; }
+
 int King::getType() const { return KING; }
 
 Queen::Queen(bool black) : Rider(black) {}
+
 const std::vector<int>& Queen::getDirections() const {
-  static const std::vector<int> directions = {-9, -8, -7, -1, 1, 7, 8, 9};
+  static const std::vector<int> directions = {-17, -16, -15, -1, 1, 15, 16, 17};
   return directions;
 }
-int Queen::getMaxOffset() const { return 1; }
+
 const char* Queen::getLanCode() const { return "Q"; }
+
 int Queen::getType() const { return QUEEN; }
 
 Rook::Rook(bool black) : Rider(black) {}
+
 const std::vector<int>& Rook::getDirections() const {
-  static const std::vector<int> directions = {-8, -1, 1, 8};
+  static const std::vector<int> directions = {-16, -1, 1, 16};
   return directions;
 }
-int Rook::getMaxOffset() const { return 1; }
+
 const char* Rook::getLanCode() const { return "R"; }
+
 int Rook::getType() const { return ROOK; }
 
 Bishop::Bishop(bool black) : Rider(black) {}
+
 const std::vector<int>& Bishop::getDirections() const {
-  static const std::vector<int> directions = {-9, -7, 7, 9};
+  static const std::vector<int> directions = {-17, -15, 15, 17};
   return directions;
 }
-int Bishop::getMaxOffset() const { return 1; }
+
 const char* Bishop::getLanCode() const { return "B"; }
+
 int Bishop::getType() const { return BISHOP; }
 
 Knight::Knight(bool black) : Leaper(black) {}
+
 const std::vector<int>& Knight::getDirections() const {
-  static const std::vector<int> directions = {-17, -15, -10, -6, 6, 10, 15, 17};
+  static const std::vector<int> directions = {-33, -31, -18, -14,
+                                              14,  18,  31,  33};
   return directions;
 }
-int Knight::getMaxOffset() const { return 2; }
+
 const char* Knight::getLanCode() const { return "N"; }
+
 int Knight::getType() const { return KNIGHT; }
 
 Pawn::Pawn(bool black) : Piece(black) {}
+
 bool Pawn::generateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         moves) const {
-  int captureDirections[] = {black_ ? -9 : -7, black_ ? 7 : 9};
+  int captureDirections[] = {black_ ? -17 : -15, black_ ? 15 : 17};
   for (int direction : captureDirections) {
     int target = origin + direction;
-    if (target >= 0 && target < 64 && std::abs(target / 8 - origin / 8) <= 1 &&
-        std::abs(target % 8 - origin % 8) <= 1) {
+    if ((target & 136) == 0) {
       if (const std::unique_ptr<Piece>& captured = board[target]) {
         if (captured->isBlack() != black_) {
           if (captured->isRoyal()) {
             return false;
           } else {
-            if (origin % 8 == (black_ ? 1 : 6)) {
+            if (origin % 16 == (black_ ? 1 : 6)) {
               std::unique_ptr<Piece> pieces[] = {
                   std::make_unique<Queen>(black_),
                   std::make_unique<Rook>(black_),
@@ -238,7 +246,7 @@ bool Pawn::generateMoves(
       } else {
         if (enPassantTarget) {
           if (target == enPassantTarget.value()) {
-            int stop = (target / 8) * 8 + origin % 8;
+            int stop = (target / 16) * 16 + origin % 16;
             if (moves) {
               moves->get().push_back(
                   std::make_shared<EnPassant>(origin, target, stop));
@@ -250,10 +258,9 @@ bool Pawn::generateMoves(
   }
   int direction = black_ ? -1 : 1;
   int target = origin + direction;
-  if (target >= 0 && target < 64 && std::abs(target / 8 - origin / 8) <= 1 &&
-      std::abs(target % 8 - origin % 8) <= 1) {
+  if ((target & 136) == 0) {
     if (!board[target]) {
-      if (origin % 8 == (black_ ? 1 : 6)) {
+      if (origin % 16 == (black_ ? 1 : 6)) {
         std::unique_ptr<Piece> pieces[] = {
             std::make_unique<Queen>(black_), std::make_unique<Rook>(black_),
             std::make_unique<Bishop>(black_), std::make_unique<Knight>(black_)};
@@ -267,7 +274,7 @@ bool Pawn::generateMoves(
         if (moves) {
           moves->get().push_back(std::make_shared<QuietMove>(origin, target));
         }
-        if (origin % 8 == (black_ ? 6 : 1)) {
+        if (origin % 16 == (black_ ? 6 : 1)) {
           int target2 = target + direction;
           if (!board[target2]) {
             if (moves) {
@@ -281,10 +288,12 @@ bool Pawn::generateMoves(
   }
   return true;
 }
+
 const char* Pawn::getLanCode() const { return ""; }
+
 int Pawn::getType() const { return PAWN; }
 
-void Piece::validate(const std::array<std::unique_ptr<Piece>, 64>& board,
+void Piece::validate(const std::array<std::unique_ptr<Piece>, 128>& board,
                      bool blackToMove, const std::set<int>& castlingOrigins,
                      const std::optional<int>& enPassantTarget) {
   for (bool black : {false, true}) {
@@ -299,8 +308,8 @@ void Piece::validate(const std::array<std::unique_ptr<Piece>, 64>& board,
     }
   }
   for (int castlingOrigin : castlingOrigins) {
-    int file = castlingOrigin / 8;
-    int rank = castlingOrigin % 8;
+    int file = castlingOrigin / 16;
+    int rank = castlingOrigin % 16;
     if (const std::unique_ptr<Piece>& piece = board[castlingOrigin];
         !(piece &&
           (file == 4 && piece->getType() == KING ||
@@ -313,7 +322,7 @@ void Piece::validate(const std::array<std::unique_ptr<Piece>, 64>& board,
     int doubleStepOrigin = enPassantTarget.value() + (blackToMove ? -1 : 1);
     int doubleStepTarget = enPassantTarget.value() + (blackToMove ? 1 : -1);
     int doubleStepStop = enPassantTarget.value();
-    if (!(doubleStepStop % 8 == (blackToMove ? 2 : 5) &&
+    if (!(doubleStepStop % 16 == (blackToMove ? 2 : 5) &&
           !board[doubleStepOrigin] && !board[doubleStepStop] &&
           board[doubleStepTarget] &&
           board[doubleStepTarget]->black_ != blackToMove &&
@@ -323,15 +332,15 @@ void Piece::validate(const std::array<std::unique_ptr<Piece>, 64>& board,
   }
 }
 
-std::string Piece::formatToString(
-    const std::array<std::unique_ptr<Piece>, 64>& board, bool blackToMove,
+std::string Piece::toFormatted(
+    const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget, const std::string& operation) {
   std::stringstream output;
   for (int rank = 7; rank >= 0; --rank) {
     output << (rank + 1);
     for (int file = 0; file <= 7; ++file) {
-      int square = file * 8 + rank;
+      int square = file * 16 + rank;
       const std::unique_ptr<Piece>& piece = board[square];
       output << ' ';
       if (piece) {
@@ -357,16 +366,16 @@ std::string Piece::formatToString(
     } else if (rank == 6) {
       output << "    Castling rights: ";
       if (!castlingOrigins.empty()) {
-        if (castlingOrigins.count(32) != 0) {
-          if (castlingOrigins.count(56) != 0) {
+        if (castlingOrigins.count(64) != 0) {
+          if (castlingOrigins.count(112) != 0) {
             output << 'K';
           }
           if (castlingOrigins.count(0) != 0) {
             output << 'Q';
           }
         }
-        if (castlingOrigins.count(39) != 0) {
-          if (castlingOrigins.count(63) != 0) {
+        if (castlingOrigins.count(71) != 0) {
+          if (castlingOrigins.count(119) != 0) {
             output << 'k';
           }
           if (castlingOrigins.count(7) != 0) {
@@ -380,8 +389,8 @@ std::string Piece::formatToString(
       output << "    En passant target: ";
       if (enPassantTarget) {
         output << std::string()
-                      .append(1, 'a' + enPassantTarget.value() / 8)
-                      .append(1, '1' + enPassantTarget.value() % 8);
+                      .append(1, 'a' + enPassantTarget.value() / 16)
+                      .append(1, '1' + enPassantTarget.value() % 16);
       } else {
         output << '-';
       }
@@ -391,10 +400,43 @@ std::string Piece::formatToString(
     output << '\n';
   }
   output << ' ';
-  for (char file = 'a'; file <= 'h'; file++) {
+  for (char file = 'a'; file <= 'h'; ++file) {
     output << ' ' << file;
   }
   return output.str();
+}
+
+int isKingInCheck(
+    const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
+    const std::set<int>& castlingOrigins,
+    const std::optional<int>& enPassantTarget,
+    std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
+        pseudoLegalMoves,
+    bool count) {
+  int nChecks = 0;
+  for (int origin = 0; origin < 128; ++origin) {
+    if ((origin & 136) == 0) {
+      if (const std::unique_ptr<Piece>& piece = board[origin]) {
+        if (piece->isBlack() == blackToMove) {
+          if (!piece->generateMoves(origin, board, castlingOrigins,
+                                    enPassantTarget, pseudoLegalMoves)) {
+            if (count) {
+              ++nChecks;
+            } else {
+              return 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  return nChecks;
+}
+
+std::string toLanCode(int square) {
+  return std::string()
+      .append(1, 'a' + square / 16)
+      .append(1, '1' + square % 16);
 }
 
 }  // namespace movement

@@ -23,18 +23,19 @@
  */
 
 #pragma once
+
 #include "Piece.h"
 
 namespace movement {
 
 class Leaper : public Piece {
   virtual const std::vector<int>& getDirections() const = 0;
-  virtual int getMaxOffset() const = 0;
 
  protected:
   Leaper(bool black);
+
   bool generateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -43,12 +44,12 @@ class Leaper : public Piece {
 
 class Rider : public Piece {
   virtual const std::vector<int>& getDirections() const = 0;
-  virtual int getMaxOffset() const = 0;
 
  protected:
   Rider(bool black);
+
   bool generateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -57,58 +58,65 @@ class Rider : public Piece {
 
 class King final : public Leaper {
   int getType() const override;
+
   const std::vector<int>& getDirections() const override;
-  int getMaxOffset() const override;
 
  public:
   King(bool black);
+
   bool isRoyal() const override;
+
   bool generateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
           moves) const override;
+
   const char* getLanCode() const override;
 };
 
 class Queen final : public Rider {
   int getType() const override;
+
   const std::vector<int>& getDirections() const override;
-  int getMaxOffset() const override;
 
  public:
   Queen(bool black);
+
   const char* getLanCode() const override;
 };
 
 class Rook final : public Rider {
   int getType() const override;
+
   const std::vector<int>& getDirections() const override;
-  int getMaxOffset() const override;
 
  public:
   Rook(bool black);
+
   const char* getLanCode() const override;
 };
 
 class Bishop final : public Rider {
   int getType() const override;
+
   const std::vector<int>& getDirections() const override;
-  int getMaxOffset() const override;
 
  public:
   Bishop(bool black);
+
   const char* getLanCode() const override;
 };
 
 class Knight final : public Leaper {
   int getType() const override;
+
   const std::vector<int>& getDirections() const override;
-  int getMaxOffset() const override;
 
  public:
   Knight(bool black);
+
   const char* getLanCode() const override;
 };
 
@@ -117,12 +125,14 @@ class Pawn final : public Piece {
 
  public:
   Pawn(bool black);
+
   bool generateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
           moves) const override;
+
   const char* getLanCode() const override;
 };
 

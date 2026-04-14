@@ -22,7 +22,7 @@ jobs:
             out_dir: x64/Release
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: microsoft/setup-msbuild@v2
 
@@ -45,6 +45,7 @@ jobs:
           Set-Content -Path $HeaderPath -Value $VERSION_CONTENT
 
       - name: Build solution
+        shell: pwsh
         run: |
           msbuild ${{ github.event.repository.name }}.sln `
             /p:Configuration=Release `
@@ -71,6 +72,10 @@ jobs:
 
           echo "ASSET_PATH=$ZIP_NAME" >> $env:GITHUB_ENV
 
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ env.ASSET_PATH }}
+      - name: Upload asset
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $TAG_NAME = "${{ github.event.release.tag_name }}"
+          gh release upload $TAG_NAME $env:ASSET_PATH

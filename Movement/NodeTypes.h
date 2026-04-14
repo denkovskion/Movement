@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <vector>
 
 #include "Node.h"
@@ -32,64 +33,72 @@ namespace movement {
 class Move;
 
 class DivideRoot : public Node {
-  unsigned long long count_;
-  std::vector<std::shared_ptr<Node>> children_;
+  const unsigned long long count_;
+  const std::vector<std::shared_ptr<Node>> children_;
 
  public:
   DivideRoot(unsigned long long count,
              const std::vector<std::shared_ptr<Node>>& children);
+
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class DivideLeaf : public Node {
-  std::shared_ptr<Move> move_;
-  unsigned long long count_;
+  const std::shared_ptr<Move> move_;
+  const unsigned long long count_;
 
  public:
   DivideLeaf(const std::shared_ptr<Move>& move, unsigned long long count);
+
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class PerftNode : public Node {
-  unsigned long long count_;
+  const unsigned long long count_;
 
  public:
   PerftNode(unsigned long long count);
+
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class MateRoot : public Node {
-  std::vector<std::shared_ptr<Node>> children_;
+  const std::vector<std::shared_ptr<Node>> children_;
 
  public:
   MateRoot(const std::vector<std::shared_ptr<Node>>& children);
+
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class MateBranch : public Node {
-  std::shared_ptr<Move> move_;
-  int distance_;
-  std::vector<std::shared_ptr<Node>> children_;
+  const std::shared_ptr<Move> move_;
+  const int distance_;
+  const std::vector<std::shared_ptr<Node>> children_;
 
  public:
   MateBranch(const std::shared_ptr<Move>& move, int distance,
              const std::vector<std::shared_ptr<Node>>& children);
+
   int getDistance() const;
+
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };
 
 class MateLeaf : public Node {
-  std::shared_ptr<Move> move_;
-  int distance_;
+  const std::shared_ptr<Move> move_;
+  const int distance_;
 
  public:
   MateLeaf(const std::shared_ptr<Move>& move_, int distance_);
+
   int getDistance() const;
+
   void doFormat(Position& position, std::ostream& output, int moveNo,
                 bool inlyne) const override;
 };

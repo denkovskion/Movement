@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <array>
 #include <functional>
 #include <memory>
@@ -38,16 +39,17 @@ struct Position;
 
 class Move {
   virtual bool preMake(Position& position) const = 0;
-  virtual void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) = 0;
-  virtual void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) = 0;
+  virtual void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) = 0;
+  virtual void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) = 0;
   virtual void updateCastlingOrigins(std::set<int>& castlingOrigins) const = 0;
   virtual void updateEnPassantTarget(
       std::optional<int>& enPassantTarget) const = 0;
-  virtual void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  virtual void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                         std::ostream& lanBuilder) const = 0;
 
  public:
   virtual ~Move();
+
   bool make(
       Position& position,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -58,12 +60,12 @@ class Move {
 
 class NullMove : public Move {
   bool preMake(Position& position) const override;
-  void updateBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
-  void revertBoard(std::array<std::unique_ptr<Piece>, 64>& board) override;
+  void updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
+  void revertBoard(std::array<std::unique_ptr<Piece>, 128>& board) override;
   void updateCastlingOrigins(std::set<int>& castlingOrigins) const override;
   void updateEnPassantTarget(
       std::optional<int>& enPassantTarget) const override;
-  void preWrite(const std::array<std::unique_ptr<Piece>, 64>& board,
+  void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                 std::ostream& lanBuilder) const override;
 };
 

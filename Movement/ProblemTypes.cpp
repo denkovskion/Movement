@@ -37,21 +37,24 @@ unsigned long long count(
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Node>>>>
         nodes);
 
-Perft::Perft(Position position, int analysisDepth)
-    : Problem(std::move(position)), nPlies_(analysisDepth) {}
+Perft::Perft(Position position, int nPlies)
+    : Problem(std::move(position)), nPlies_(nPlies) {}
+
 std::string Perft::getOperation() const {
   return "Perft at depth " + std::to_string(nPlies_);
 }
+
 std::shared_ptr<Node> Perft::doSolve(
+    Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed) {
   if (detailed) {
     std::vector<std::shared_ptr<Node>> nodes;
     unsigned long long nNodes =
-        count(nPlies_, position_, pseudoLegalMoves, nodes);
+        count(nPlies_, position, pseudoLegalMoves, nodes);
     return std::make_shared<DivideRoot>(nNodes, nodes);
   } else {
     unsigned long long nNodes =
-        count(nPlies_, position_, pseudoLegalMoves, std::nullopt);
+        count(nPlies_, position, pseudoLegalMoves, std::nullopt);
     return std::make_shared<PerftNode>(nNodes);
   }
 }
@@ -84,19 +87,24 @@ std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
     std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed);
 int searchMax(int nMoves, Position& position,
-              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax);
+              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax,
+              bool detailed);
 int searchMin(int nMoves, Position& position,
-              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMin);
+              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMin,
+              bool detailed);
 
-MateSearch::MateSearch(Position position, int searchDepth)
-    : Problem(std::move(position)), nMoves_(searchDepth) {}
+MateSearch::MateSearch(Position position, int nMoves)
+    : Problem(std::move(position)), nMoves_(nMoves) {}
+
 std::string MateSearch::getOperation() const {
   return "Mate in " + std::to_string(nMoves_);
 }
+
 std::shared_ptr<Node> MateSearch::doSolve(
+    Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed) {
   std::vector<std::shared_ptr<Node>> nodes =
-      analyse(nMoves_, position_, pseudoLegalMoves, detailed);
+      analyse(nMoves_, position, pseudoLegalMoves, detailed);
   return std::make_shared<MateRoot>(nodes);
 }
 
@@ -104,19 +112,19 @@ std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
     std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed) {
   std::vector<std::shared_ptr<Node>> nodes;
-  for (std::shared_ptr<Move> moveMax : pseudoLegalMoves) {
-    if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
-        moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
-      int min = searchMin(nMoves, position, pseudoLegalMovesMin);
-      if (min > 0) {
-        int distanceMax = nMoves - min + 1;
-        if (detailed) {
+  if (detailed) {
+    for (const std::shared_ptr<Move>& moveMax : pseudoLegalMoves) {
+      if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
+          moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
+        int min = searchMin(nMoves, position, pseudoLegalMovesMin, true);
+        if (min > 0) {
+          int distanceMax = nMoves - min + 1;
           std::vector<std::shared_ptr<Node>> nodesMin;
-          for (std::shared_ptr<Move> moveMin : pseudoLegalMovesMin) {
+          for (const std::shared_ptr<Move>& moveMin : pseudoLegalMovesMin) {
             if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMax;
                 moveMin->make(position, pseudoLegalMovesMax, std::nullopt)) {
-              int max =
-                  searchMax(distanceMax - 1, position, pseudoLegalMovesMax);
+              int max = searchMax(distanceMax - 1, position,
+                                  pseudoLegalMovesMax, true);
               int distanceMin = distanceMax - max;
               std::vector<std::shared_ptr<Node>> nodesMax =
                   analyse(distanceMin, position, pseudoLegalMovesMax, true);
@@ -135,68 +143,87 @@ std::vector<std::shared_ptr<Node>> analyse(
                            });
           nodes.push_back(
               std::make_shared<MateBranch>(moveMax, distanceMax, nodesMin));
-        } else {
-          nodes.push_back(std::make_shared<MateLeaf>(moveMax, distanceMax));
         }
       }
+      moveMax->unmake(position);
     }
-    moveMax->unmake(position);
+    std::stable_sort(
+        nodes.begin(), nodes.end(),
+        [](const std::shared_ptr<Node>& node1,
+           const std::shared_ptr<Node>& node2) {
+          return std::static_pointer_cast<MateBranch>(node1)->getDistance() <
+                 std::static_pointer_cast<MateBranch>(node2)->getDistance();
+        });
+  } else {
+    for (const std::shared_ptr<Move>& moveMax : pseudoLegalMoves) {
+      if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
+          moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
+        for (int depth = 1; depth <= nMoves; ++depth) {
+          int min = searchMin(depth, position, pseudoLegalMovesMin, false);
+          if (min > 0) {
+            nodes.push_back(std::make_shared<MateLeaf>(moveMax, depth));
+            break;
+          }
+        }
+      }
+      moveMax->unmake(position);
+    }
+    std::stable_sort(
+        nodes.begin(), nodes.end(),
+        [](const std::shared_ptr<Node>& node1,
+           const std::shared_ptr<Node>& node2) {
+          return std::static_pointer_cast<MateLeaf>(node1)->getDistance() <
+                 std::static_pointer_cast<MateLeaf>(node2)->getDistance();
+        });
   }
-  std::stable_sort(
-      nodes.begin(), nodes.end(),
-      [detailed](const std::shared_ptr<Node>& node1,
-                 const std::shared_ptr<Node>& node2) {
-        return (detailed
-                    ? std::static_pointer_cast<MateBranch>(node1)->getDistance()
-                    : std::static_pointer_cast<MateLeaf>(node1)
-                          ->getDistance()) <
-               (detailed
-                    ? std::static_pointer_cast<MateBranch>(node2)->getDistance()
-                    : std::static_pointer_cast<MateLeaf>(node2)->getDistance());
-      });
   return nodes;
 }
+
 int searchMax(int nMoves, Position& position,
-              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax) {
+              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax,
+              bool detailed) {
   int max = -1;
-  for (const std::shared_ptr<Move>& move : pseudoLegalMovesMax) {
+  for (const std::shared_ptr<Move>& moveMax : pseudoLegalMovesMax) {
     if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
-        move->make(position, pseudoLegalMovesMin, std::nullopt)) {
-      int min = searchMin(nMoves, position, pseudoLegalMovesMin);
+        moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
+      int min = searchMin(nMoves, position, pseudoLegalMovesMin, detailed);
       if (min > max) {
         max = min;
       }
     }
-    move->unmake(position);
-    if (max == nMoves) {
+    moveMax->unmake(position);
+    if (max == (detailed ? nMoves : 1)) {
       break;
     }
   }
   return max;
 }
+
 int searchMin(int nMoves, Position& position,
-              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMin) {
+              const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMin,
+              bool detailed) {
   int min = 0;
   if (nMoves == 1) {
-    for (const std::shared_ptr<Move>& move : pseudoLegalMovesMin) {
-      if (move->make(position, std::nullopt, std::nullopt)) {
+    for (const std::shared_ptr<Move>& moveMin : pseudoLegalMovesMin) {
+      if (moveMin->make(position, std::nullopt, std::nullopt)) {
         min = -1;
       }
-      move->unmake(position);
+      moveMin->unmake(position);
       if (min == -1) {
         break;
       }
     }
   } else {
-    for (const std::shared_ptr<Move>& move : pseudoLegalMovesMin) {
+    for (const std::shared_ptr<Move>& moveMin : pseudoLegalMovesMin) {
       if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMax;
-          move->make(position, pseudoLegalMovesMax, std::nullopt)) {
-        int max = searchMax(nMoves - 1, position, pseudoLegalMovesMax);
+          moveMin->make(position, pseudoLegalMovesMax, std::nullopt)) {
+        int max =
+            searchMax(nMoves - 1, position, pseudoLegalMovesMax, detailed);
         if (min == 0 || max < min) {
           min = max;
         }
       }
-      move->unmake(position);
+      moveMin->unmake(position);
       if (min == -1) {
         break;
       }
@@ -204,7 +231,9 @@ int searchMin(int nMoves, Position& position,
   }
   if (min == 0) {
     std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
-    min = nullMove->make(position, std::nullopt, std::nullopt) ? -1 : nMoves;
+    min = nullMove->make(position, std::nullopt, std::nullopt)
+              ? -1
+              : (detailed ? nMoves : 1);
     nullMove->unmake(position);
   }
   return min;

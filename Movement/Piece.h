@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <array>
 #include <functional>
 #include <memory>
@@ -40,27 +41,40 @@ class Piece {
 
  protected:
   const bool black_;
+
   Piece(bool black);
 
  public:
   virtual ~Piece();
+
   bool isBlack() const;
   virtual bool isRoyal() const;
+
   virtual bool generateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 64>& board,
+      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
           moves) const = 0;
+
   virtual const char* getLanCode() const = 0;
 
-  static void validate(const std::array<std::unique_ptr<Piece>, 64>& board,
+  static void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
                        bool blackToMove, const std::set<int>& castlingOrigins,
                        const std::optional<int>& enPassantTarget);
-  static std::string formatToString(
-      const std::array<std::unique_ptr<Piece>, 64>& board, bool blackToMove,
+  static std::string toFormatted(
+      const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget, const std::string& operation);
 };
+
+int isKingInCheck(
+    const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
+    const std::set<int>& castlingOrigins,
+    const std::optional<int>& enPassantTarget,
+    std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
+        pseudoLegalMoves,
+    bool count);
+std::string toLanCode(int square);
 
 }  // namespace movement

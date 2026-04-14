@@ -32,6 +32,7 @@ namespace movement {
 DivideRoot::DivideRoot(unsigned long long count,
                        const std::vector<std::shared_ptr<Node>>& children)
     : count_(count), children_(children) {}
+
 void DivideRoot::doFormat(Position& position, std::ostream& output, int moveNo,
                           bool inlyne) const {
   for (const std::shared_ptr<Node>& child : children_) {
@@ -44,6 +45,7 @@ void DivideRoot::doFormat(Position& position, std::ostream& output, int moveNo,
 DivideLeaf::DivideLeaf(const std::shared_ptr<Move>& move,
                        unsigned long long count)
     : move_(move), count_(count) {}
+
 void DivideLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
                           bool inlyne) const {
   move_->make(position, std::nullopt, output);
@@ -52,6 +54,7 @@ void DivideLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
 }
 
 PerftNode::PerftNode(unsigned long long count) : count_(count) {}
+
 void PerftNode::doFormat(Position& position, std::ostream& output, int moveNo,
                          bool inlyne) const {
   output << count_;
@@ -59,6 +62,7 @@ void PerftNode::doFormat(Position& position, std::ostream& output, int moveNo,
 
 MateRoot::MateRoot(const std::vector<std::shared_ptr<Node>>& children)
     : children_(children) {}
+
 void MateRoot::doFormat(Position& position, std::ostream& output, int moveNo,
                         bool inlyne) const {
   bool first = true;
@@ -74,7 +78,9 @@ void MateRoot::doFormat(Position& position, std::ostream& output, int moveNo,
 MateBranch::MateBranch(const std::shared_ptr<Move>& move, int distance,
                        const std::vector<std::shared_ptr<Node>>& children)
     : move_(move), distance_(distance), children_(children) {}
+
 int MateBranch::getDistance() const { return distance_; }
+
 void MateBranch::doFormat(Position& position, std::ostream& output, int moveNo,
                           bool inlyne) const {
   if (position.blackToMove) {
@@ -104,7 +110,9 @@ void MateBranch::doFormat(Position& position, std::ostream& output, int moveNo,
 
 MateLeaf::MateLeaf(const std::shared_ptr<Move>& move, int distance)
     : move_(move), distance_(distance) {}
+
 int MateLeaf::getDistance() const { return distance_; }
+
 void MateLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
                         bool inlyne) const {
   move_->make(position, std::nullopt, output);

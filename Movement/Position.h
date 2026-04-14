@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <utility>
 
 #include "Piece.h"
@@ -30,7 +31,7 @@
 namespace movement {
 
 struct Position {
-  std::array<std::unique_ptr<Piece>, 64> board;
+  std::array<std::unique_ptr<Piece>, 128> board;
   bool blackToMove = false;
   std::set<int> castlingOrigins;
   std::optional<int> enPassantTarget;
@@ -42,7 +43,6 @@ bool isPositionLegal(
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves);
 
-std::string formatToString(const Position& position,
-                           const std::string& operation);
+std::string toFormatted(const Position& position, const std::string& operation);
 
 }  // namespace movement
