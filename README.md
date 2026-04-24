@@ -18,6 +18,7 @@ end-of-file, then solves them and writes solutions to standard output.
 - `-h`, `--help` Shows help and exits.
 - `-V`, `--version` Shows version and exits.
 - `-d`, `--detailed` Enables detailed analysis.
+- `-v`, `--verbose` Enables verbose logging.
 
 ## Example
 

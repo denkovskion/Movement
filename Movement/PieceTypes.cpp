@@ -35,7 +35,7 @@ enum { KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
 
 Leaper::Leaper(bool black) : Piece(black) {}
 
-bool Leaper::generateMoves(
+bool Leaper::doGenerateMoves(
     int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
@@ -67,7 +67,7 @@ bool Leaper::generateMoves(
 
 Rider::Rider(bool black) : Piece(black) {}
 
-bool Rider::generateMoves(
+bool Rider::doGenerateMoves(
     int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
@@ -108,14 +108,14 @@ King::King(bool black) : Leaper(black) {}
 
 bool King::isRoyal() const { return true; }
 
-bool King::generateMoves(
+bool King::doGenerateMoves(
     int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         moves) const {
-  if (!Leaper::generateMoves(origin, board, castlingOrigins, enPassantTarget,
-                             moves)) {
+  if (!Leaper::doGenerateMoves(origin, board, castlingOrigins, enPassantTarget,
+                               moves)) {
     return false;
   }
   if (castlingOrigins.count(origin) != 0) {
@@ -208,7 +208,7 @@ int Knight::getType() const { return KNIGHT; }
 
 Pawn::Pawn(bool black) : Piece(black) {}
 
-bool Pawn::generateMoves(
+bool Pawn::doGenerateMoves(
     int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
@@ -406,7 +406,7 @@ std::string Piece::toFormatted(
   return output.str();
 }
 
-int isKingInCheck(
+int generateMoves(
     const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
@@ -418,19 +418,19 @@ int isKingInCheck(
     if ((origin & 136) == 0) {
       if (const std::unique_ptr<Piece>& piece = board[origin]) {
         if (piece->isBlack() == blackToMove) {
-          if (!piece->generateMoves(origin, board, castlingOrigins,
-                                    enPassantTarget, pseudoLegalMoves)) {
+          if (!piece->doGenerateMoves(origin, board, castlingOrigins,
+                                      enPassantTarget, pseudoLegalMoves)) {
             if (count) {
               ++nChecks;
             } else {
-              return 1;
+              return 0;
             }
           }
         }
       }
     }
   }
-  return nChecks;
+  return nChecks == 0 ? 1 : -nChecks;
 }
 
 std::string toLanCode(int square) {

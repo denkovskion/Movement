@@ -53,7 +53,7 @@ bool Move::make(
   updateEnPassantTarget(position.enPassantTarget);
   position.blackToMove = !position.blackToMove;
   if (legal) {
-    legal = isPositionLegal(position, pseudoLegalMoves);
+    legal = isLegal(position, pseudoLegalMoves);
   }
   if (lanBuilder) {
     if (legal) {
@@ -99,7 +99,7 @@ void postWrite(
   if (pseudoLegalMoves) {
     pseudoLegalMovesNext = pseudoLegalMoves->get();
   } else {
-    isKingInCheck(position.board, position.blackToMove,
+    generateMoves(position.board, position.blackToMove,
                   position.castlingOrigins, position.enPassantTarget,
                   pseudoLegalMovesNext, true);
   }
@@ -115,26 +115,22 @@ void postWrite(
   }
   std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
   nullMove->make(position, std::nullopt, std::nullopt);
-  int nChecks = isKingInCheck(position.board, position.blackToMove,
-                              position.castlingOrigins,
-                              position.enPassantTarget, std::nullopt, true);
+  int legal = generateMoves(position.board, position.blackToMove,
+                            position.castlingOrigins, position.enPassantTarget,
+                            std::nullopt, true);
   nullMove->unmake(position);
   if (terminal) {
-    if (nChecks > 0) {
-      if (nChecks > 1) {
-        for (int i = 0; i < nChecks; ++i) {
-          lanBuilder << "+";
-        }
+    if (legal == 1) {
+      lanBuilder << "=";
+    } else {
+      if (legal < -1) {
+        lanBuilder << std::string(-legal, '+');
       }
       lanBuilder << "#";
-    } else {
-      lanBuilder << "=";
     }
   } else {
-    if (nChecks > 0) {
-      for (int i = 0; i < nChecks; ++i) {
-        lanBuilder << "+";
-      }
+    if (legal < 0) {
+      lanBuilder << std::string(-legal, '+');
     }
   }
 }

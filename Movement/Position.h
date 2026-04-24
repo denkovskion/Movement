@@ -38,7 +38,7 @@ struct Position {
   std::vector<std::pair<std::set<int>, std::optional<int>>> memory;
 };
 
-bool isPositionLegal(
+bool isLegal(
     const Position& position,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves);

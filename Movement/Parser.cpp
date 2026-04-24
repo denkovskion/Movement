@@ -36,20 +36,20 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
   std::vector<std::unique_ptr<Problem>> problems;
   for (std::string line; std::getline(std::cin, line);) {
     Position position;
-    std::istringstream tokenInput(line);
-    if (std::string token; tokenInput >> token) {
-      std::istringstream symbolInput(token);
+    std::istringstream tokens(line);
+    if (std::string token; tokens >> token) {
+      std::istringstream symbols(token);
       int rank = 7;
       for (; rank >= 0; --rank) {
         int file = 0;
         for (; file <= 7; ++file) {
-          char symbol = symbolInput.get();
+          char symbol = symbols.get();
           if (symbol >= '1' && symbol <= '8' - file) {
             file += symbol - '0';
             if (file > 7) {
               break;
             }
-            symbol = symbolInput.get();
+            symbol = symbols.get();
           }
           int square = file * 16 + rank;
           if (symbol == 'K') {
@@ -84,24 +84,24 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
           break;
         }
         if (rank > 0) {
-          if (symbolInput.get() != '/') {
+          if (symbols.get() != '/') {
             break;
           }
         } else {
-          if (symbolInput.get(); !symbolInput.eof()) {
+          if (symbols.get(); !symbols.eof()) {
             break;
           }
         }
       }
       if (rank < 0) {
-        if (std::string token; tokenInput >> token) {
+        if (std::string token; tokens >> token) {
           if (std::regex_match(token, std::regex("[wb]"))) {
             if (token == "w") {
               position.blackToMove = false;
             } else if (token == "b") {
               position.blackToMove = true;
             }
-            if (std::string token; tokenInput >> token) {
+            if (std::string token; tokens >> token) {
               if (std::regex_match(token, std::regex("\\bK?Q?k?q?|-"))) {
                 if (!(token == "-")) {
                   for (char symbol : token) {
@@ -121,22 +121,22 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
                     }
                   }
                 }
-                if (std::string token; tokenInput >> token) {
+                if (std::string token; tokens >> token) {
                   if (std::regex_match(token, std::regex("[a-h][36]|-"))) {
                     if (!(token == "-")) {
                       int file = token.at(0) - 'a';
                       int rank = token.at(1) - '1';
                       position.enPassantTarget = file * 16 + rank;
                     }
-                    if (std::string token; tokenInput >> token) {
+                    if (std::string token; tokens >> token) {
                       if (std::regex_match(token, std::regex("acd|dm"))) {
                         try {
                           if (token == "acd") {
-                            if (std::string token; tokenInput >> token) {
+                            if (std::string token; tokens >> token) {
                               if (std::regex_match(
                                       token, std::regex("(0|[1-9]\\d*);"))) {
                                 int nPlies = std::stoi(token);
-                                if (std::string token; !(tokenInput >> token)) {
+                                if (std::string token; !(tokens >> token)) {
                                   Piece::validate(position.board,
                                                   position.blackToMove,
                                                   position.castlingOrigins,
@@ -148,11 +148,11 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
                               }
                             }
                           } else if (token == "dm") {
-                            if (std::string token; tokenInput >> token) {
+                            if (std::string token; tokens >> token) {
                               if (std::regex_match(token,
                                                    std::regex("[1-9]\\d*;"))) {
                                 int nMoves = std::stoi(token);
-                                if (std::string token; !(tokenInput >> token)) {
+                                if (std::string token; !(tokens >> token)) {
                                   Piece::validate(position.board,
                                                   position.blackToMove,
                                                   position.castlingOrigins,

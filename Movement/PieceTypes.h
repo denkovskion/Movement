@@ -34,7 +34,7 @@ class Leaper : public Piece {
  protected:
   Leaper(bool black);
 
-  bool generateMoves(
+  bool doGenerateMoves(
       int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
@@ -48,7 +48,7 @@ class Rider : public Piece {
  protected:
   Rider(bool black);
 
-  bool generateMoves(
+  bool doGenerateMoves(
       int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
@@ -66,7 +66,7 @@ class King final : public Leaper {
 
   bool isRoyal() const override;
 
-  bool generateMoves(
+  bool doGenerateMoves(
       int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
@@ -126,7 +126,7 @@ class Pawn final : public Piece {
  public:
   Pawn(bool black);
 
-  bool generateMoves(
+  bool doGenerateMoves(
       int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,

@@ -50,7 +50,7 @@ class Piece {
   bool isBlack() const;
   virtual bool isRoyal() const;
 
-  virtual bool generateMoves(
+  virtual bool doGenerateMoves(
       int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
@@ -68,7 +68,7 @@ class Piece {
       const std::optional<int>& enPassantTarget, const std::string& operation);
 };
 
-int isKingInCheck(
+int generateMoves(
     const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,

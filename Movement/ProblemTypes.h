@@ -34,8 +34,8 @@ class Perft : public Problem {
   std::string getOperation() const override;
   std::shared_ptr<Node> doSolve(
       Position& position,
-      const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
-      bool detailed) override;
+      const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
+      bool verbose) override;
 
  public:
   Perft(Position position, int nPlies);
@@ -47,8 +47,8 @@ class MateSearch : public Problem {
   std::string getOperation() const override;
   std::shared_ptr<Node> doSolve(
       Position& position,
-      const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
-      bool detailed) override;
+      const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
+      bool verbose) override;
 
  public:
   MateSearch(Position position, int nMoves);

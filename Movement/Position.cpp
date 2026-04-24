@@ -26,13 +26,13 @@
 
 namespace movement {
 
-bool isPositionLegal(
+bool isLegal(
     const Position& position,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves) {
-  return isKingInCheck(position.board, position.blackToMove,
+  return generateMoves(position.board, position.blackToMove,
                        position.castlingOrigins, position.enPassantTarget,
-                       pseudoLegalMoves, false) == 0;
+                       pseudoLegalMoves, false) == 1;
 }
 
 std::string toFormatted(const Position& position,

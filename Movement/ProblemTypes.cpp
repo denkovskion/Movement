@@ -25,6 +25,8 @@
 #include "ProblemTypes.h"
 
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 
 #include "Move.h"
 #include "NodeTypes.h"
@@ -35,7 +37,8 @@ unsigned long long count(
     int nPlies, Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Node>>>>
-        nodes);
+        nodes,
+    bool verbose);
 
 Perft::Perft(Position position, int nPlies)
     : Problem(std::move(position)), nPlies_(nPlies) {}
@@ -46,15 +49,16 @@ std::string Perft::getOperation() const {
 
 std::shared_ptr<Node> Perft::doSolve(
     Position& position,
-    const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed) {
+    const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
+    bool verbose) {
   if (detailed) {
     std::vector<std::shared_ptr<Node>> nodes;
     unsigned long long nNodes =
-        count(nPlies_, position, pseudoLegalMoves, nodes);
+        count(nPlies_, position, pseudoLegalMoves, nodes, verbose);
     return std::make_shared<DivideRoot>(nNodes, nodes);
   } else {
     unsigned long long nNodes =
-        count(nPlies_, position, pseudoLegalMoves, std::nullopt);
+        count(nPlies_, position, pseudoLegalMoves, std::nullopt, verbose);
     return std::make_shared<PerftNode>(nNodes);
   }
 }
@@ -63,29 +67,44 @@ unsigned long long count(
     int nPlies, Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Node>>>>
-        nodes) {
+        nodes,
+    bool verbose) {
   if (nPlies == 0) {
     return 1;
   }
   unsigned long long nNodes = 0;
   for (const std::shared_ptr<Move>& move : pseudoLegalMoves) {
-    if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesNext;
-        move->make(position, pseudoLegalMovesNext, std::nullopt)) {
-      unsigned long long nChildNodes =
-          count(nPlies - 1, position, pseudoLegalMovesNext, std::nullopt);
+    std::vector<std::shared_ptr<Move>> pseudoLegalMovesNext;
+    std::ostringstream lanBuilder;
+    if (verbose ? move->make(position, pseudoLegalMovesNext, lanBuilder)
+                : move->make(position, pseudoLegalMovesNext, std::nullopt)) {
+      unsigned long long nChildNodes = count(
+          nPlies - 1, position, pseudoLegalMovesNext, std::nullopt, false);
       if (nodes) {
         nodes->get().push_back(std::make_shared<DivideLeaf>(move, nChildNodes));
       }
       nNodes += nChildNodes;
+      if (verbose) {
+        logger(std::clog) << "Evaluated '" + lanBuilder.str() + "'. Counted " +
+                                 std::to_string(nChildNodes) +
+                                 " nodes at depth " + std::to_string(nPlies) +
+                                 ".\n";
+      }
     }
     move->unmake(position);
+  }
+  if (verbose) {
+    logger(std::clog) << "Finished counting. " + std::to_string(nNodes) +
+                             " nodes at depth " + std::to_string(nPlies) +
+                             ".\n";
   }
   return nNodes;
 }
 
 std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
-    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed);
+    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed,
+    bool verbose);
 int searchMax(int nMoves, Position& position,
               const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax,
               bool detailed);
@@ -102,23 +121,33 @@ std::string MateSearch::getOperation() const {
 
 std::shared_ptr<Node> MateSearch::doSolve(
     Position& position,
-    const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed) {
+    const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
+    bool verbose) {
   std::vector<std::shared_ptr<Node>> nodes =
-      analyse(nMoves_, position, pseudoLegalMoves, detailed);
+      analyse(nMoves_, position, pseudoLegalMoves, detailed, verbose);
   return std::make_shared<MateRoot>(nodes);
 }
 
 std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
-    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed) {
+    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed,
+    bool verbose) {
   std::vector<std::shared_ptr<Node>> nodes;
   if (detailed) {
     for (const std::shared_ptr<Move>& moveMax : pseudoLegalMoves) {
-      if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
-          moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
+      std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
+      std::ostringstream lanBuilder;
+      if (verbose
+              ? moveMax->make(position, pseudoLegalMovesMin, lanBuilder)
+              : moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
         int min = searchMin(nMoves, position, pseudoLegalMovesMin, true);
         if (min > 0) {
           int distanceMax = nMoves - min + 1;
+          if (verbose) {
+            logger(std::clog) << "Tried '" + lanBuilder.str() +
+                                     "'. Found mate in " +
+                                     std::to_string(distanceMax) + ".\n";
+          }
           std::vector<std::shared_ptr<Node>> nodesMin;
           for (const std::shared_ptr<Move>& moveMin : pseudoLegalMovesMin) {
             if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMax;
@@ -126,8 +155,8 @@ std::vector<std::shared_ptr<Node>> analyse(
               int max = searchMax(distanceMax - 1, position,
                                   pseudoLegalMovesMax, true);
               int distanceMin = distanceMax - max;
-              std::vector<std::shared_ptr<Node>> nodesMax =
-                  analyse(distanceMin, position, pseudoLegalMovesMax, true);
+              std::vector<std::shared_ptr<Node>> nodesMax = analyse(
+                  distanceMin, position, pseudoLegalMovesMax, true, false);
               nodesMin.push_back(
                   std::make_shared<MateBranch>(moveMin, distanceMin, nodesMax));
             }
@@ -143,6 +172,16 @@ std::vector<std::shared_ptr<Node>> analyse(
                            });
           nodes.push_back(
               std::make_shared<MateBranch>(moveMax, distanceMax, nodesMin));
+          if (verbose) {
+            logger(std::clog)
+                << "Finished analysis of '" + lanBuilder.str() + "'.\n";
+          }
+        } else {
+          if (verbose) {
+            logger(std::clog) << "Tried '" + lanBuilder.str() +
+                                     "'. No mate in " + std::to_string(nMoves) +
+                                     ".\n";
+          }
         }
       }
       moveMax->unmake(position);
@@ -156,14 +195,25 @@ std::vector<std::shared_ptr<Node>> analyse(
         });
   } else {
     for (const std::shared_ptr<Move>& moveMax : pseudoLegalMoves) {
-      if (std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
-          moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
-        for (int depth = 1; depth <= nMoves; ++depth) {
-          int min = searchMin(depth, position, pseudoLegalMovesMin, false);
-          if (min > 0) {
+      std::vector<std::shared_ptr<Move>> pseudoLegalMovesMin;
+      std::ostringstream lanBuilder;
+      if (verbose
+              ? moveMax->make(position, pseudoLegalMovesMin, lanBuilder)
+              : moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
+        int depth = 1;
+        for (; depth <= nMoves; ++depth) {
+          if (searchMin(depth, position, pseudoLegalMovesMin, false) > 0) {
             nodes.push_back(std::make_shared<MateLeaf>(moveMax, depth));
             break;
           }
+        }
+        if (verbose) {
+          logger(std::clog)
+              << (depth <= nMoves
+                      ? "Tried '" + lanBuilder.str() + "'. Found mate in " +
+                            std::to_string(depth) + ".\n"
+                      : "Tried '" + lanBuilder.str() + "'. No mate in " +
+                            std::to_string(nMoves) + ".\n");
         }
       }
       moveMax->unmake(position);

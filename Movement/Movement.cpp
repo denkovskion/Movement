@@ -48,6 +48,7 @@ int main(int argc, char* argv[]) {
     bool help = false;
     bool version = false;
     bool detailed = false;
+    bool verbose = false;
     for (int i = 1; i < argc; ++i) {
       std::string arg = argv[i];
       if (arg == "--help") {
@@ -56,7 +57,9 @@ int main(int argc, char* argv[]) {
         version = true;
       } else if (arg == "--detailed") {
         detailed = true;
-      } else if (std::regex_match(arg, std::regex("-[hVd]+"))) {
+      } else if (arg == "--verbose") {
+        verbose = true;
+      } else if (std::regex_match(arg, std::regex("-[hVdv]+"))) {
         for (char letter : arg.substr(1)) {
           if (letter == 'h') {
             help = true;
@@ -64,6 +67,8 @@ int main(int argc, char* argv[]) {
             version = true;
           } else if (letter == 'd') {
             detailed = true;
+          } else if (letter == 'v') {
+            verbose = true;
           }
         }
       } else {
@@ -82,6 +87,7 @@ Options:
   -h, --help       Show help and exit
   -V, --version    Show version and exit
   -d, --detailed   Enable detailed analysis
+  -v, --verbose    Enable verbose logging
 )";
       return 0;
     }
@@ -98,7 +104,8 @@ Options:
     std::vector<std::unique_ptr<movement::Problem>> problems =
         movement::readAllProblems();
     for (const std::unique_ptr<movement::Problem>& problem : problems) {
-      problem->solve(detailed);
+      problem->write();
+      problem->solve(detailed, verbose);
     }
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
