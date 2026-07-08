@@ -26,7 +26,6 @@
 
 #include <memory>
 #include <ostream>
-#include <string>
 
 namespace movement {
 
@@ -36,16 +35,14 @@ class Node {
  public:
   ~Node();
 
-  virtual void doFormat(Position& position, std::ostream& output, int moveNo,
+  virtual void formatTo(std::ostream& output, Position& position, int moveNo,
                         bool inlyne) const = 0;
 };
 
 class IllegalNode : public Node {
  public:
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
-
-std::string toFormatted(const std::shared_ptr<Node>& node, Position& position);
 
 }  // namespace movement

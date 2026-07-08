@@ -33,15 +33,14 @@ namespace movement {
 class Node;
 
 class Problem {
-  Position position_;
-
   virtual std::string getOperation() const = 0;
   virtual std::shared_ptr<Node> doSolve(
-      Position& position,
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
       bool verbose) = 0;
 
  protected:
+  Position position_;
+
   Problem(Position position);
 
  public:

@@ -137,10 +137,9 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
                                       token, std::regex("(0|[1-9]\\d*);"))) {
                                 int nPlies = std::stoi(token);
                                 if (std::string token; !(tokens >> token)) {
-                                  Piece::validate(position.board,
-                                                  position.blackToMove,
-                                                  position.castlingOrigins,
-                                                  position.enPassantTarget);
+                                  validate(position.board, position.blackToMove,
+                                           position.castlingOrigins,
+                                           position.enPassantTarget);
                                   problems.push_back(std::make_unique<Perft>(
                                       std::move(position), nPlies));
                                   continue;
@@ -153,10 +152,9 @@ std::vector<std::unique_ptr<Problem>> readAllProblems() {
                                                    std::regex("[1-9]\\d*;"))) {
                                 int nMoves = std::stoi(token);
                                 if (std::string token; !(tokens >> token)) {
-                                  Piece::validate(position.board,
-                                                  position.blackToMove,
-                                                  position.castlingOrigins,
-                                                  position.enPassantTarget);
+                                  validate(position.board, position.blackToMove,
+                                           position.castlingOrigins,
+                                           position.enPassantTarget);
                                   problems.push_back(
                                       std::make_unique<MateSearch>(
                                           std::move(position), nMoves));

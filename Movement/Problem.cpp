@@ -45,11 +45,12 @@ void Problem::solve(bool detailed, bool verbose) {
   std::shared_ptr<Node> solution;
   if (std::vector<std::shared_ptr<Move>> pseudoLegalMoves;
       isLegal(position_, pseudoLegalMoves)) {
-    solution = doSolve(position_, pseudoLegalMoves, detailed, verbose);
+    solution = doSolve(pseudoLegalMoves, detailed, verbose);
   } else {
     solution = std::make_shared<IllegalNode>();
   }
-  std::cout << toFormatted(solution, position_) << std::endl;
+  solution->formatTo(std::cout, position_, 1, false);
+  std::cout << std::endl;
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   logger(std::clog)
       << "Finished solving in " +
@@ -62,8 +63,8 @@ void Problem::solve(bool detailed, bool verbose) {
 
 void Problem::write() {
   std::cout << std::string(42, '_') << std::endl;
-  std::cout << toFormatted(position_, getOperation()) << std::endl;
-  std::cout << std::endl;
+  formatTo(std::cout, position_, getOperation());
+  std::cout << std::endl << std::endl;
 }
 
 std::ostream& logger(std::ostream& output) {

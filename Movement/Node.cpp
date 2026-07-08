@@ -24,21 +24,13 @@
 
 #include "Node.h"
 
-#include <sstream>
-
 namespace movement {
 
 Node::~Node() {}
 
-void IllegalNode::doFormat(Position& position, std::ostream& output, int moveNo,
+void IllegalNode::formatTo(std::ostream& output, Position& position, int moveNo,
                            bool inlyne) const {
   output << "Illegal position";
-}
-
-std::string toFormatted(const std::shared_ptr<Node>& node, Position& position) {
-  std::stringstream output;
-  node->doFormat(position, output, 1, false);
-  return output.str();
 }
 
 }  // namespace movement

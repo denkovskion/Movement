@@ -48,17 +48,16 @@ std::string Perft::getOperation() const {
 }
 
 std::shared_ptr<Node> Perft::doSolve(
-    Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
     bool verbose) {
   if (detailed) {
     std::vector<std::shared_ptr<Node>> nodes;
     unsigned long long nNodes =
-        count(nPlies_, position, pseudoLegalMoves, nodes, verbose);
+        count(nPlies_, position_, pseudoLegalMoves, nodes, verbose);
     return std::make_shared<DivideRoot>(nNodes, nodes);
   } else {
     unsigned long long nNodes =
-        count(nPlies_, position, pseudoLegalMoves, std::nullopt, verbose);
+        count(nPlies_, position_, pseudoLegalMoves, std::nullopt, verbose);
     return std::make_shared<PerftNode>(nNodes);
   }
 }
@@ -103,7 +102,7 @@ unsigned long long count(
 
 std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
-    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed,
+    const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
     bool verbose);
 int searchMax(int nMoves, Position& position,
               const std::vector<std::shared_ptr<Move>>& pseudoLegalMovesMax,
@@ -120,17 +119,16 @@ std::string MateSearch::getOperation() const {
 }
 
 std::shared_ptr<Node> MateSearch::doSolve(
-    Position& position,
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
     bool verbose) {
   std::vector<std::shared_ptr<Node>> nodes =
-      analyse(nMoves_, position, pseudoLegalMoves, detailed, verbose);
+      analyse(nMoves_, position_, pseudoLegalMoves, detailed, verbose);
   return std::make_shared<MateRoot>(nodes);
 }
 
 std::vector<std::shared_ptr<Node>> analyse(
     int nMoves, Position& position,
-    std::vector<std::shared_ptr<Move>> pseudoLegalMoves, bool detailed,
+    const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
     bool verbose) {
   std::vector<std::shared_ptr<Node>> nodes;
   if (detailed) {
@@ -202,7 +200,7 @@ std::vector<std::shared_ptr<Node>> analyse(
               : moveMax->make(position, pseudoLegalMovesMin, std::nullopt)) {
         int depth = 1;
         for (; depth <= nMoves; ++depth) {
-          if (searchMin(depth, position, pseudoLegalMovesMin, false) > 0) {
+          if (searchMin(depth, position, pseudoLegalMovesMin, false) == 1) {
             nodes.push_back(std::make_shared<MateLeaf>(moveMax, depth));
             break;
           }

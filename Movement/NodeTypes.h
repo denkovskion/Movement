@@ -40,7 +40,7 @@ class DivideRoot : public Node {
   DivideRoot(unsigned long long count,
              const std::vector<std::shared_ptr<Node>>& children);
 
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
 
@@ -51,7 +51,7 @@ class DivideLeaf : public Node {
  public:
   DivideLeaf(const std::shared_ptr<Move>& move, unsigned long long count);
 
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
 
@@ -61,7 +61,7 @@ class PerftNode : public Node {
  public:
   PerftNode(unsigned long long count);
 
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
 
@@ -71,7 +71,7 @@ class MateRoot : public Node {
  public:
   MateRoot(const std::vector<std::shared_ptr<Node>>& children);
 
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
 
@@ -86,7 +86,7 @@ class MateBranch : public Node {
 
   int getDistance() const;
 
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
 
@@ -99,7 +99,7 @@ class MateLeaf : public Node {
 
   int getDistance() const;
 
-  void doFormat(Position& position, std::ostream& output, int moveNo,
+  void formatTo(std::ostream& output, Position& position, int moveNo,
                 bool inlyne) const override;
 };
 

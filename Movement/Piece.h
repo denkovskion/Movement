@@ -28,6 +28,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <ostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -59,13 +60,14 @@ class Piece {
 
   virtual const char* getLanCode() const = 0;
 
-  static void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
+  friend void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
                        bool blackToMove, const std::set<int>& castlingOrigins,
                        const std::optional<int>& enPassantTarget);
-  static std::string toFormatted(
-      const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
-      const std::set<int>& castlingOrigins,
-      const std::optional<int>& enPassantTarget, const std::string& operation);
+  friend void formatTo(std::ostream& output,
+                       const std::array<std::unique_ptr<Piece>, 128>& board,
+                       bool blackToMove, const std::set<int>& castlingOrigins,
+                       const std::optional<int>& enPassantTarget,
+                       const std::string& operation);
 };
 
 int generateMoves(

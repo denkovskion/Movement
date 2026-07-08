@@ -24,7 +24,6 @@
 
 #include "PieceTypes.h"
 
-#include <sstream>
 #include <stdexcept>
 
 #include "MoveTypes.h"
@@ -293,9 +292,9 @@ const char* Pawn::getLanCode() const { return ""; }
 
 int Pawn::getType() const { return PAWN; }
 
-void Piece::validate(const std::array<std::unique_ptr<Piece>, 128>& board,
-                     bool blackToMove, const std::set<int>& castlingOrigins,
-                     const std::optional<int>& enPassantTarget) {
+void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
+              bool blackToMove, const std::set<int>& castlingOrigins,
+              const std::optional<int>& enPassantTarget) {
   for (bool black : {false, true}) {
     int frequency = 0;
     for (const std::unique_ptr<Piece>& piece : board) {
@@ -332,13 +331,13 @@ void Piece::validate(const std::array<std::unique_ptr<Piece>, 128>& board,
   }
 }
 
-std::string Piece::toFormatted(
-    const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
-    const std::set<int>& castlingOrigins,
-    const std::optional<int>& enPassantTarget, const std::string& operation) {
-  std::stringstream output;
+void formatTo(std::ostream& output,
+              const std::array<std::unique_ptr<Piece>, 128>& board,
+              bool blackToMove, const std::set<int>& castlingOrigins,
+              const std::optional<int>& enPassantTarget,
+              const std::string& operation) {
   for (int rank = 7; rank >= 0; --rank) {
-    output << (rank + 1);
+    output << rank + 1;
     for (int file = 0; file <= 7; ++file) {
       int square = file * 16 + rank;
       const std::unique_ptr<Piece>& piece = board[square];
@@ -403,7 +402,6 @@ std::string Piece::toFormatted(
   for (char file = 'a'; file <= 'h'; ++file) {
     output << ' ' << file;
   }
-  return output.str();
 }
 
 int generateMoves(

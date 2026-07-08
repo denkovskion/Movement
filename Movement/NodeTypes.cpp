@@ -33,10 +33,10 @@ DivideRoot::DivideRoot(unsigned long long count,
                        const std::vector<std::shared_ptr<Node>>& children)
     : count_(count), children_(children) {}
 
-void DivideRoot::doFormat(Position& position, std::ostream& output, int moveNo,
+void DivideRoot::formatTo(std::ostream& output, Position& position, int moveNo,
                           bool inlyne) const {
   for (const std::shared_ptr<Node>& child : children_) {
-    child->doFormat(position, output, moveNo, false);
+    child->formatTo(output, position, moveNo, false);
     output << "\n";
   }
   output << count_;
@@ -46,7 +46,7 @@ DivideLeaf::DivideLeaf(const std::shared_ptr<Move>& move,
                        unsigned long long count)
     : move_(move), count_(count) {}
 
-void DivideLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
+void DivideLeaf::formatTo(std::ostream& output, Position& position, int moveNo,
                           bool inlyne) const {
   move_->make(position, std::nullopt, output);
   output << " " << count_;
@@ -55,7 +55,7 @@ void DivideLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
 
 PerftNode::PerftNode(unsigned long long count) : count_(count) {}
 
-void PerftNode::doFormat(Position& position, std::ostream& output, int moveNo,
+void PerftNode::formatTo(std::ostream& output, Position& position, int moveNo,
                          bool inlyne) const {
   output << count_;
 }
@@ -63,14 +63,14 @@ void PerftNode::doFormat(Position& position, std::ostream& output, int moveNo,
 MateRoot::MateRoot(const std::vector<std::shared_ptr<Node>>& children)
     : children_(children) {}
 
-void MateRoot::doFormat(Position& position, std::ostream& output, int moveNo,
+void MateRoot::formatTo(std::ostream& output, Position& position, int moveNo,
                         bool inlyne) const {
   bool first = true;
   for (const std::shared_ptr<Node>& child : children_) {
     if (!first) {
       output << "\n";
     }
-    child->doFormat(position, output, moveNo, false);
+    child->formatTo(output, position, moveNo, false);
     first = false;
   }
 }
@@ -81,7 +81,7 @@ MateBranch::MateBranch(const std::shared_ptr<Move>& move, int distance,
 
 int MateBranch::getDistance() const { return distance_; }
 
-void MateBranch::doFormat(Position& position, std::ostream& output, int moveNo,
+void MateBranch::formatTo(std::ostream& output, Position& position, int moveNo,
                           bool inlyne) const {
   if (position.blackToMove) {
     if (!inlyne) {
@@ -101,7 +101,7 @@ void MateBranch::doFormat(Position& position, std::ostream& output, int moveNo,
         output << "\t";
       }
     }
-    child->doFormat(position, output,
+    child->formatTo(output, position,
                     position.blackToMove ? moveNo : moveNo + 1, first);
     first = false;
   }
@@ -113,7 +113,7 @@ MateLeaf::MateLeaf(const std::shared_ptr<Move>& move, int distance)
 
 int MateLeaf::getDistance() const { return distance_; }
 
-void MateLeaf::doFormat(Position& position, std::ostream& output, int moveNo,
+void MateLeaf::formatTo(std::ostream& output, Position& position, int moveNo,
                         bool inlyne) const {
   move_->make(position, std::nullopt, output);
   output << " [#" << distance_ << "]";
