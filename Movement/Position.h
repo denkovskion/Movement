@@ -43,7 +43,7 @@ bool isLegal(
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves);
 
-void formatTo(std::ostream& output, const Position& position,
-              const std::string& operation);
+std::string toFormattedString(const Position& position,
+                              const std::string& operation);
 
 }  // namespace movement

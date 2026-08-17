@@ -28,9 +28,9 @@ namespace movement {
 
 Node::~Node() {}
 
-void IllegalNode::formatTo(std::ostream& output, Position& position, int moveNo,
-                           bool inlyne) const {
-  output << "Illegal position";
+std::string IllegalNode::toFormattedString(Position& position, int moveNo,
+                                           bool inlyne) const {
+  return "Illegal position";
 }
 
 }  // namespace movement

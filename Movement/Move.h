@@ -46,6 +46,12 @@ class Move {
       std::optional<int>& enPassantTarget) const = 0;
   virtual void preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
                         std::ostream& lanBuilder) const = 0;
+  void postWrite(
+      Position& position,
+      std::optional<
+          std::reference_wrapper<const std::vector<std::shared_ptr<Move>>>>
+          pseudoLegalMoves,
+      std::ostream& lanBuilder);
 
  public:
   virtual ~Move();

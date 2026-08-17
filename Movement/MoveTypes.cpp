@@ -77,15 +77,15 @@ Castling::Castling(int origin, int target, int origin2, int target2)
 
 bool Castling::preMake(Position& position) const {
   std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
-  bool result = nullMove->make(position, std::nullopt, std::nullopt);
+  bool preLegal = nullMove->make(position, std::nullopt, std::nullopt);
   nullMove->unmake(position);
-  if (result) {
+  if (preLegal) {
     std::shared_ptr<Move> quietMove =
         std::make_shared<QuietMove>(origin_, target2_);
-    result = quietMove->make(position, std::nullopt, std::nullopt);
+    preLegal = quietMove->make(position, std::nullopt, std::nullopt);
     quietMove->unmake(position);
   }
-  return result;
+  return preLegal;
 }
 
 void Castling::updateBoard(std::array<std::unique_ptr<Piece>, 128>& board) {

@@ -25,7 +25,7 @@
 #pragma once
 
 #include <memory>
-#include <ostream>
+#include <string>
 
 namespace movement {
 
@@ -35,14 +35,14 @@ class Node {
  public:
   ~Node();
 
-  virtual void formatTo(std::ostream& output, Position& position, int moveNo,
-                        bool inlyne) const = 0;
+  virtual std::string toFormattedString(Position& position, int moveNo,
+                                        bool inlyne) const = 0;
 };
 
 class IllegalNode : public Node {
  public:
-  void formatTo(std::ostream& output, Position& position, int moveNo,
-                bool inlyne) const override;
+  std::string toFormattedString(Position& position, int moveNo,
+                                bool inlyne) const override;
 };
 
 }  // namespace movement

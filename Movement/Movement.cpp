@@ -104,7 +104,6 @@ Options:
     std::vector<std::unique_ptr<movement::Problem>> problems =
         movement::readAllProblems();
     for (const std::unique_ptr<movement::Problem>& problem : problems) {
-      problem->write();
       problem->solve(detailed, verbose);
     }
   } catch (const std::exception& error) {

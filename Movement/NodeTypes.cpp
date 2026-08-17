@@ -24,6 +24,8 @@
 
 #include "NodeTypes.h"
 
+#include <sstream>
+
 #include "Move.h"
 #include "Position.h"
 
@@ -33,46 +35,52 @@ DivideRoot::DivideRoot(unsigned long long count,
                        const std::vector<std::shared_ptr<Node>>& children)
     : count_(count), children_(children) {}
 
-void DivideRoot::formatTo(std::ostream& output, Position& position, int moveNo,
-                          bool inlyne) const {
+std::string DivideRoot::toFormattedString(Position& position, int moveNo,
+                                          bool inlyne) const {
+  std::ostringstream output;
   for (const std::shared_ptr<Node>& child : children_) {
-    child->formatTo(output, position, moveNo, false);
+    output << child->toFormattedString(position, moveNo, false);
     output << "\n";
   }
   output << count_;
+  return output.str();
 }
 
 DivideLeaf::DivideLeaf(const std::shared_ptr<Move>& move,
                        unsigned long long count)
     : move_(move), count_(count) {}
 
-void DivideLeaf::formatTo(std::ostream& output, Position& position, int moveNo,
-                          bool inlyne) const {
+std::string DivideLeaf::toFormattedString(Position& position, int moveNo,
+                                          bool inlyne) const {
+  std::ostringstream output;
   move_->make(position, std::nullopt, output);
   output << " " << count_;
   move_->unmake(position);
+  return output.str();
 }
 
 PerftNode::PerftNode(unsigned long long count) : count_(count) {}
 
-void PerftNode::formatTo(std::ostream& output, Position& position, int moveNo,
-                         bool inlyne) const {
-  output << count_;
+std::string PerftNode::toFormattedString(Position& position, int moveNo,
+                                         bool inlyne) const {
+  return std::to_string(count_);
 }
 
 MateRoot::MateRoot(const std::vector<std::shared_ptr<Node>>& children)
     : children_(children) {}
 
-void MateRoot::formatTo(std::ostream& output, Position& position, int moveNo,
-                        bool inlyne) const {
+std::string MateRoot::toFormattedString(Position& position, int moveNo,
+                                        bool inlyne) const {
+  std::ostringstream output;
   bool first = true;
   for (const std::shared_ptr<Node>& child : children_) {
     if (!first) {
       output << "\n";
     }
-    child->formatTo(output, position, moveNo, false);
+    output << child->toFormattedString(position, moveNo, false);
     first = false;
   }
+  return output.str();
 }
 
 MateBranch::MateBranch(const std::shared_ptr<Move>& move, int distance,
@@ -81,8 +89,9 @@ MateBranch::MateBranch(const std::shared_ptr<Move>& move, int distance,
 
 int MateBranch::getDistance() const { return distance_; }
 
-void MateBranch::formatTo(std::ostream& output, Position& position, int moveNo,
-                          bool inlyne) const {
+std::string MateBranch::toFormattedString(Position& position, int moveNo,
+                                          bool inlyne) const {
+  std::ostringstream output;
   if (position.blackToMove) {
     if (!inlyne) {
       output << moveNo << "...";
@@ -101,11 +110,12 @@ void MateBranch::formatTo(std::ostream& output, Position& position, int moveNo,
         output << "\t";
       }
     }
-    child->formatTo(output, position,
-                    position.blackToMove ? moveNo : moveNo + 1, first);
+    output << child->toFormattedString(
+        position, position.blackToMove ? moveNo : moveNo + 1, first);
     first = false;
   }
   move_->unmake(position);
+  return output.str();
 }
 
 MateLeaf::MateLeaf(const std::shared_ptr<Move>& move, int distance)
@@ -113,11 +123,13 @@ MateLeaf::MateLeaf(const std::shared_ptr<Move>& move, int distance)
 
 int MateLeaf::getDistance() const { return distance_; }
 
-void MateLeaf::formatTo(std::ostream& output, Position& position, int moveNo,
-                        bool inlyne) const {
+std::string MateLeaf::toFormattedString(Position& position, int moveNo,
+                                        bool inlyne) const {
+  std::ostringstream output;
   move_->make(position, std::nullopt, output);
   output << " [#" << distance_ << "]";
   move_->unmake(position);
+  return output.str();
 }
 
 }  // namespace movement

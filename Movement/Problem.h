@@ -47,7 +47,6 @@ class Problem {
   virtual ~Problem();
 
   void solve(bool detailed, bool verbose);
-  void write();
 };
 
 std::vector<std::unique_ptr<Problem>> readAllProblems();

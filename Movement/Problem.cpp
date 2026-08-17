@@ -38,6 +38,9 @@ Problem::Problem(Position position) : position_(std::move(position)) {}
 Problem::~Problem() {}
 
 void Problem::solve(bool detailed, bool verbose) {
+  std::cout << std::string(42, '_') << std::endl;
+  std::cout << toFormattedString(position_, getOperation()) << std::endl;
+  std::cout << std::endl;
   logger(std::clog) << (detailed ? "Solving with analysis...\n"
                                  : "Solving...\n");
   std::chrono::steady_clock::time_point begin =
@@ -49,8 +52,7 @@ void Problem::solve(bool detailed, bool verbose) {
   } else {
     solution = std::make_shared<IllegalNode>();
   }
-  solution->formatTo(std::cout, position_, 1, false);
-  std::cout << std::endl;
+  std::cout << solution->toFormattedString(position_, 1, false) << std::endl;
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   logger(std::clog)
       << "Finished solving in " +
@@ -59,12 +61,6 @@ void Problem::solve(bool detailed, bool verbose) {
                                                                        begin)
                      .count()) +
              "ms.\n";
-}
-
-void Problem::write() {
-  std::cout << std::string(42, '_') << std::endl;
-  formatTo(std::cout, position_, getOperation());
-  std::cout << std::endl << std::endl;
 }
 
 std::ostream& logger(std::ostream& output) {

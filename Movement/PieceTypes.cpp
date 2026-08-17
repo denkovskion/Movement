@@ -24,18 +24,19 @@
 
 #include "PieceTypes.h"
 
+#include <sstream>
 #include <stdexcept>
 
 #include "MoveTypes.h"
 
 namespace movement {
 
-enum { KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
+enum class PieceType { KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
 
 Leaper::Leaper(bool black) : Piece(black) {}
 
-bool Leaper::doGenerateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+bool Leaper::generateMoves(
+    const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -66,8 +67,8 @@ bool Leaper::doGenerateMoves(
 
 Rider::Rider(bool black) : Piece(black) {}
 
-bool Rider::doGenerateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+bool Rider::generateMoves(
+    const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -107,14 +108,14 @@ King::King(bool black) : Leaper(black) {}
 
 bool King::isRoyal() const { return true; }
 
-bool King::doGenerateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+bool King::generateMoves(
+    const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         moves) const {
-  if (!Leaper::doGenerateMoves(origin, board, castlingOrigins, enPassantTarget,
-                               moves)) {
+  if (!Leaper::generateMoves(board, origin, castlingOrigins, enPassantTarget,
+                             moves)) {
     return false;
   }
   if (castlingOrigins.count(origin) != 0) {
@@ -158,7 +159,7 @@ const std::vector<int>& King::getDirections() const {
 
 const char* King::getLanCode() const { return "K"; }
 
-int King::getType() const { return KING; }
+PieceType King::getType() const { return PieceType::KING; }
 
 Queen::Queen(bool black) : Rider(black) {}
 
@@ -169,7 +170,7 @@ const std::vector<int>& Queen::getDirections() const {
 
 const char* Queen::getLanCode() const { return "Q"; }
 
-int Queen::getType() const { return QUEEN; }
+PieceType Queen::getType() const { return PieceType::QUEEN; }
 
 Rook::Rook(bool black) : Rider(black) {}
 
@@ -180,7 +181,7 @@ const std::vector<int>& Rook::getDirections() const {
 
 const char* Rook::getLanCode() const { return "R"; }
 
-int Rook::getType() const { return ROOK; }
+PieceType Rook::getType() const { return PieceType::ROOK; }
 
 Bishop::Bishop(bool black) : Rider(black) {}
 
@@ -191,7 +192,7 @@ const std::vector<int>& Bishop::getDirections() const {
 
 const char* Bishop::getLanCode() const { return "B"; }
 
-int Bishop::getType() const { return BISHOP; }
+PieceType Bishop::getType() const { return PieceType::BISHOP; }
 
 Knight::Knight(bool black) : Leaper(black) {}
 
@@ -203,12 +204,12 @@ const std::vector<int>& Knight::getDirections() const {
 
 const char* Knight::getLanCode() const { return "N"; }
 
-int Knight::getType() const { return KNIGHT; }
+PieceType Knight::getType() const { return PieceType::KNIGHT; }
 
 Pawn::Pawn(bool black) : Piece(black) {}
 
-bool Pawn::doGenerateMoves(
-    int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+bool Pawn::generateMoves(
+    const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
     const std::set<int>& castlingOrigins,
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -290,7 +291,7 @@ bool Pawn::doGenerateMoves(
 
 const char* Pawn::getLanCode() const { return ""; }
 
-int Pawn::getType() const { return PAWN; }
+PieceType Pawn::getType() const { return PieceType::PAWN; }
 
 void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
               bool blackToMove, const std::set<int>& castlingOrigins,
@@ -298,7 +299,8 @@ void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
   for (bool black : {false, true}) {
     int frequency = 0;
     for (const std::unique_ptr<Piece>& piece : board) {
-      if (piece && piece->black_ == black && piece->getType() == KING) {
+      if (piece && piece->black_ == black &&
+          piece->getType() == PieceType::KING) {
         ++frequency;
       }
     }
@@ -311,8 +313,8 @@ void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
     int rank = castlingOrigin % 16;
     if (const std::unique_ptr<Piece>& piece = board[castlingOrigin];
         !(piece &&
-          (file == 4 && piece->getType() == KING ||
-           (file == 0 || file == 7) && piece->getType() == ROOK) &&
+          (file == 4 && piece->getType() == PieceType::KING ||
+           (file == 0 || file == 7) && piece->getType() == PieceType::ROOK) &&
           (rank == 0 && !piece->black_ || rank == 7 && piece->black_))) {
       throw std::invalid_argument("Not accepted castling rights");
     }
@@ -325,17 +327,17 @@ void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
           !board[doubleStepOrigin] && !board[doubleStepStop] &&
           board[doubleStepTarget] &&
           board[doubleStepTarget]->black_ != blackToMove &&
-          board[doubleStepTarget]->getType() == PAWN)) {
+          board[doubleStepTarget]->getType() == PieceType::PAWN)) {
       throw std::invalid_argument("Not accepted en passant square");
     }
   }
 }
 
-void formatTo(std::ostream& output,
-              const std::array<std::unique_ptr<Piece>, 128>& board,
-              bool blackToMove, const std::set<int>& castlingOrigins,
-              const std::optional<int>& enPassantTarget,
-              const std::string& operation) {
+std::string toFormattedString(
+    const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
+    const std::set<int>& castlingOrigins,
+    const std::optional<int>& enPassantTarget, const std::string& operation) {
+  std::ostringstream output;
   for (int rank = 7; rank >= 0; --rank) {
     output << rank + 1;
     for (int file = 0; file <= 7; ++file) {
@@ -343,17 +345,17 @@ void formatTo(std::ostream& output,
       const std::unique_ptr<Piece>& piece = board[square];
       output << ' ';
       if (piece) {
-        if (piece->getType() == KING) {
+        if (piece->getType() == PieceType::KING) {
           output << (piece->black_ ? 'k' : 'K');
-        } else if (piece->getType() == QUEEN) {
+        } else if (piece->getType() == PieceType::QUEEN) {
           output << (piece->black_ ? 'q' : 'Q');
-        } else if (piece->getType() == ROOK) {
+        } else if (piece->getType() == PieceType::ROOK) {
           output << (piece->black_ ? 'r' : 'R');
-        } else if (piece->getType() == BISHOP) {
+        } else if (piece->getType() == PieceType::BISHOP) {
           output << (piece->black_ ? 'b' : 'B');
-        } else if (piece->getType() == KNIGHT) {
+        } else if (piece->getType() == PieceType::KNIGHT) {
           output << (piece->black_ ? 'n' : 'N');
-        } else if (piece->getType() == PAWN) {
+        } else if (piece->getType() == PieceType::PAWN) {
           output << (piece->black_ ? 'p' : 'P');
         }
       } else {
@@ -402,6 +404,7 @@ void formatTo(std::ostream& output,
   for (char file = 'a'; file <= 'h'; ++file) {
     output << ' ' << file;
   }
+  return output.str();
 }
 
 int generateMoves(
@@ -416,8 +419,8 @@ int generateMoves(
     if ((origin & 136) == 0) {
       if (const std::unique_ptr<Piece>& piece = board[origin]) {
         if (piece->isBlack() == blackToMove) {
-          if (!piece->doGenerateMoves(origin, board, castlingOrigins,
-                                      enPassantTarget, pseudoLegalMoves)) {
+          if (!piece->generateMoves(board, origin, castlingOrigins,
+                                    enPassantTarget, pseudoLegalMoves)) {
             if (count) {
               ++nChecks;
             } else {

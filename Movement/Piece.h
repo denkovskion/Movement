@@ -28,7 +28,6 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <ostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -37,8 +36,10 @@ namespace movement {
 
 class Move;
 
+enum class PieceType;
+
 class Piece {
-  virtual int getType() const = 0;
+  virtual PieceType getType() const = 0;
 
  protected:
   const bool black_;
@@ -51,8 +52,8 @@ class Piece {
   bool isBlack() const;
   virtual bool isRoyal() const;
 
-  virtual bool doGenerateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+  virtual bool generateMoves(
+      const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -63,11 +64,10 @@ class Piece {
   friend void validate(const std::array<std::unique_ptr<Piece>, 128>& board,
                        bool blackToMove, const std::set<int>& castlingOrigins,
                        const std::optional<int>& enPassantTarget);
-  friend void formatTo(std::ostream& output,
-                       const std::array<std::unique_ptr<Piece>, 128>& board,
-                       bool blackToMove, const std::set<int>& castlingOrigins,
-                       const std::optional<int>& enPassantTarget,
-                       const std::string& operation);
+  friend std::string toFormattedString(
+      const std::array<std::unique_ptr<Piece>, 128>& board, bool blackToMove,
+      const std::set<int>& castlingOrigins,
+      const std::optional<int>& enPassantTarget, const std::string& operation);
 };
 
 int generateMoves(
@@ -77,6 +77,7 @@ int generateMoves(
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves,
     bool count);
+
 std::string toLanCode(int square);
 
 }  // namespace movement

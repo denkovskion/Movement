@@ -34,8 +34,8 @@ class Leaper : public Piece {
  protected:
   Leaper(bool black);
 
-  bool doGenerateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+  bool generateMoves(
+      const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -48,8 +48,8 @@ class Rider : public Piece {
  protected:
   Rider(bool black);
 
-  bool doGenerateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+  bool generateMoves(
+      const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -57,7 +57,7 @@ class Rider : public Piece {
 };
 
 class King final : public Leaper {
-  int getType() const override;
+  PieceType getType() const override;
 
   const std::vector<int>& getDirections() const override;
 
@@ -66,8 +66,8 @@ class King final : public Leaper {
 
   bool isRoyal() const override;
 
-  bool doGenerateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+  bool generateMoves(
+      const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
@@ -77,7 +77,7 @@ class King final : public Leaper {
 };
 
 class Queen final : public Rider {
-  int getType() const override;
+  PieceType getType() const override;
 
   const std::vector<int>& getDirections() const override;
 
@@ -88,7 +88,7 @@ class Queen final : public Rider {
 };
 
 class Rook final : public Rider {
-  int getType() const override;
+  PieceType getType() const override;
 
   const std::vector<int>& getDirections() const override;
 
@@ -99,7 +99,7 @@ class Rook final : public Rider {
 };
 
 class Bishop final : public Rider {
-  int getType() const override;
+  PieceType getType() const override;
 
   const std::vector<int>& getDirections() const override;
 
@@ -110,7 +110,7 @@ class Bishop final : public Rider {
 };
 
 class Knight final : public Leaper {
-  int getType() const override;
+  PieceType getType() const override;
 
   const std::vector<int>& getDirections() const override;
 
@@ -121,13 +121,13 @@ class Knight final : public Leaper {
 };
 
 class Pawn final : public Piece {
-  int getType() const override;
+  PieceType getType() const override;
 
  public:
   Pawn(bool black);
 
-  bool doGenerateMoves(
-      int origin, const std::array<std::unique_ptr<Piece>, 128>& board,
+  bool generateMoves(
+      const std::array<std::unique_ptr<Piece>, 128>& board, int origin,
       const std::set<int>& castlingOrigins,
       const std::optional<int>& enPassantTarget,
       std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>

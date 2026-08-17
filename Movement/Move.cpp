@@ -28,13 +28,6 @@
 
 namespace movement {
 
-void postWrite(
-    Position& position,
-    std::optional<
-        std::reference_wrapper<const std::vector<std::shared_ptr<Move>>>>
-        pseudoLegalMoves,
-    std::ostream& lanBuilder);
-
 Move::~Move() {}
 
 bool Move::make(
@@ -89,7 +82,7 @@ void NullMove::preWrite(const std::array<std::unique_ptr<Piece>, 128>& board,
   lanBuilder << "null";
 }
 
-void postWrite(
+void Move::postWrite(
     Position& position,
     std::optional<
         std::reference_wrapper<const std::vector<std::shared_ptr<Move>>>>
@@ -114,7 +107,12 @@ void postWrite(
     }
   }
   std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
-  nullMove->make(position, std::nullopt, std::nullopt);
+  nullMove->updateBoard(position.board);
+  position.memory.push_back(
+      {position.castlingOrigins, position.enPassantTarget});
+  nullMove->updateCastlingOrigins(position.castlingOrigins);
+  nullMove->updateEnPassantTarget(position.enPassantTarget);
+  position.blackToMove = !position.blackToMove;
   int legal = generateMoves(position.board, position.blackToMove,
                             position.castlingOrigins, position.enPassantTarget,
                             std::nullopt, true);

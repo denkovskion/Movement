@@ -35,11 +35,11 @@ bool isLegal(
                        pseudoLegalMoves, false) == 1;
 }
 
-void formatTo(std::ostream& output, const Position& position,
-              const std::string& operation) {
-  return formatTo(output, position.board, position.blackToMove,
-                  position.castlingOrigins, position.enPassantTarget,
-                  operation);
+std::string toFormattedString(const Position& position,
+                              const std::string& operation) {
+  return toFormattedString(position.board, position.blackToMove,
+                           position.castlingOrigins, position.enPassantTarget,
+                           operation);
 }
 
 }  // namespace movement
