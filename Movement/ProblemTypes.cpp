@@ -43,11 +43,11 @@ unsigned long long count(
 Perft::Perft(Position position, int nPlies)
     : Problem(std::move(position)), nPlies_(nPlies) {}
 
-std::string Perft::getOperation() const {
+std::string Perft::getSummary() const {
   return "Perft at depth " + std::to_string(nPlies_);
 }
 
-std::shared_ptr<Node> Perft::doSolve(
+std::shared_ptr<Node> Perft::solve(
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
     bool verbose) {
   if (detailed) {
@@ -114,11 +114,11 @@ int searchMin(Position& position, int nMoves,
 MateSearch::MateSearch(Position position, int nMoves)
     : Problem(std::move(position)), nMoves_(nMoves) {}
 
-std::string MateSearch::getOperation() const {
+std::string MateSearch::getSummary() const {
   return "Mate in " + std::to_string(nMoves_);
 }
 
-std::shared_ptr<Node> MateSearch::doSolve(
+std::shared_ptr<Node> MateSearch::solve(
     const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
     bool verbose) {
   std::vector<std::shared_ptr<Node>> nodes =
@@ -278,11 +278,11 @@ int searchMin(Position& position, int nMoves,
     }
   }
   if (min == 0) {
-    std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
-    min = nullMove->make(position, std::nullopt, std::nullopt) ? -1
-          : detailed                                           ? nMoves
-                                                               : 1;
-    nullMove->unmake(position);
+    NullMove nullMove;
+    min = nullMove.make(position, std::nullopt, std::nullopt) ? -1
+          : detailed                                          ? nMoves
+                                                              : 1;
+    nullMove.unmake(position);
   }
   return min;
 }

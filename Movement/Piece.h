@@ -76,7 +76,7 @@ int generateMoves(
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves,
-    bool count);
+    bool countChecks);
 
 std::string toLanCode(int square);
 

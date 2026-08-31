@@ -76,14 +76,13 @@ Castling::Castling(int origin, int target, int origin2, int target2)
     : QuietMove(origin, target), origin2_(origin2), target2_(target2) {}
 
 bool Castling::preMake(Position& position) const {
-  std::shared_ptr<Move> nullMove = std::make_shared<NullMove>();
-  bool preLegal = nullMove->make(position, std::nullopt, std::nullopt);
-  nullMove->unmake(position);
+  NullMove nullMove;
+  bool preLegal = nullMove.make(position, std::nullopt, std::nullopt);
+  nullMove.unmake(position);
   if (preLegal) {
-    std::shared_ptr<Move> quietMove =
-        std::make_shared<QuietMove>(origin_, target2_);
-    preLegal = quietMove->make(position, std::nullopt, std::nullopt);
-    quietMove->unmake(position);
+    QuietMove quietMove(origin_, target2_);
+    preLegal = quietMove.make(position, std::nullopt, std::nullopt);
+    quietMove.unmake(position);
   }
   return preLegal;
 }

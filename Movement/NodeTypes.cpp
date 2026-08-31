@@ -105,10 +105,8 @@ std::string MateBranch::toFormattedString(Position& position, int moveNo,
     if (first) {
       output << " ";
     } else {
-      output << "\n";
-      for (int i = 0; i < (position.blackToMove ? moveNo - 1 : moveNo); ++i) {
-        output << "\t";
-      }
+      output << "\n"
+             << std::string(position.blackToMove ? moveNo - 1 : moveNo, '\t');
     }
     output << child->toFormattedString(
         position, position.blackToMove ? moveNo : moveNo + 1, first);

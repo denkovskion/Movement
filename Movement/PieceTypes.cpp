@@ -413,7 +413,7 @@ int generateMoves(
     const std::optional<int>& enPassantTarget,
     std::optional<std::reference_wrapper<std::vector<std::shared_ptr<Move>>>>
         pseudoLegalMoves,
-    bool count) {
+    bool countChecks) {
   int nChecks = 0;
   for (int origin = 0; origin < 128; ++origin) {
     if ((origin & 136) == 0) {
@@ -421,7 +421,7 @@ int generateMoves(
         if (piece->isBlack() == blackToMove) {
           if (!piece->generateMoves(board, origin, castlingOrigins,
                                     enPassantTarget, pseudoLegalMoves)) {
-            if (count) {
+            if (countChecks) {
               ++nChecks;
             } else {
               return 0;

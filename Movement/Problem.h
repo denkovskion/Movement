@@ -33,8 +33,9 @@ namespace movement {
 class Node;
 
 class Problem {
-  virtual std::string getOperation() const = 0;
-  virtual std::shared_ptr<Node> doSolve(
+  virtual std::string getSummary() const = 0;
+
+  virtual std::shared_ptr<Node> solve(
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
       bool verbose) = 0;
 

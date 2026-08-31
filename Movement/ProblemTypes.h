@@ -31,8 +31,9 @@ namespace movement {
 class Perft : public Problem {
   const int nPlies_;
 
-  std::string getOperation() const override;
-  std::shared_ptr<Node> doSolve(
+  std::string getSummary() const override;
+
+  std::shared_ptr<Node> solve(
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
       bool verbose) override;
 
@@ -43,8 +44,9 @@ class Perft : public Problem {
 class MateSearch : public Problem {
   const int nMoves_;
 
-  std::string getOperation() const override;
-  std::shared_ptr<Node> doSolve(
+  std::string getSummary() const override;
+
+  std::shared_ptr<Node> solve(
       const std::vector<std::shared_ptr<Move>>& pseudoLegalMoves, bool detailed,
       bool verbose) override;
 

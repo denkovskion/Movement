@@ -39,7 +39,7 @@ Problem::~Problem() {}
 
 void Problem::solve(bool detailed, bool verbose) {
   std::cout << std::string(42, '_') << std::endl;
-  std::cout << toFormattedString(position_, getOperation()) << std::endl;
+  std::cout << toFormattedString(position_, getSummary()) << std::endl;
   std::cout << std::endl;
   logger(std::clog) << (detailed ? "Solving with analysis...\n"
                                  : "Solving...\n");
@@ -48,7 +48,7 @@ void Problem::solve(bool detailed, bool verbose) {
   std::shared_ptr<Node> solution;
   if (std::vector<std::shared_ptr<Move>> pseudoLegalMoves;
       isLegal(position_, pseudoLegalMoves)) {
-    solution = doSolve(pseudoLegalMoves, detailed, verbose);
+    solution = solve(pseudoLegalMoves, detailed, verbose);
   } else {
     solution = std::make_shared<IllegalNode>();
   }
